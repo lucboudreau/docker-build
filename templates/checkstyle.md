@@ -7,13 +7,13 @@ Changed files:
 Checkstyle violations:
 ----------------------
 {% for violation in violations -%}
-  {%- if loop.index == 0 -%}
+  {%- if loop.index == 1 -%}
     Errors:
-    File {{ violation.filename }}
-    {%- for error in violation.errors -%}
-      {{ loop.index }}. Message: {{error.message}} at Line: {{ error.line }} Column: {{ error.column }}
-    {%- endfor -%}
   {%- endif -%}
+  File {{ violation.filename }}
+  {%- for error in violation.errors -%}
+    {{ loop.index }}. Message: {{error.message}} at Line: {{ error.line }} Column: {{ error.column }}
+  {%- endfor -%}
 {%- else -%}
   No errors found
 {%- endfor %}
