@@ -11,8 +11,8 @@ Checkstyle violations:
     Errors:
   {%- endif -%}
   File {{ violation.filename }}
-  {%- for error in violation.errors -%}
-    {{ loop.index }}. Message: {{error.message}} at Line: {{ error.line }} Column: {{ error.column }}
+  {%- for error in violation.errors %}
+{{ loop.index }}. Message: {{error.message}} at Line: {{ error.line }} Column: {{ error.column }}
   {%- endfor -%}
 {%- else -%}
   No errors found
