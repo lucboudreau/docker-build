@@ -49,6 +49,7 @@ if __name__ == '__main__':
   parser.add_argument("-a", "--apiToken", help="Github api token")
   parser.add_argument("-r", "--repository", help="Format: owner/repo")
   parser.add_argument("-p", "--pullRequest", help="Pull request number")
+  parser.add_argument("-o", "--stdout", action='store_true', default=False, help="Print to stdout instead of posting")
   args, unknown = parser.parse_known_args()
   with open('aggregate-metrics/checkstyle.json', 'r') as f:
     checkstyle = json.load(f)
@@ -81,4 +82,7 @@ if __name__ == '__main__':
   else:
     print 'Posting comment on pull request'
 
-  post_comment(args.repository, args.pullRequest, args.apiToken, '\n'.join(comments))
+  if args.stdout:
+    print '\n'.join(comments)
+  else:
+    post_comment(args.repository, args.pullRequest, args.apiToken, '\n'.join(comments))
