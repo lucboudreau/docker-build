@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
   output = '\n'.join(comments)
   
-  if not args.repository or not args.pullRequest or not args.apiToken:
+  if not args.stdout and (not args.repository or not args.pullRequest or not args.apiToken):
     parser.print_help()
     raise Exception('repository, pullRequest, apiToken required')
   else:

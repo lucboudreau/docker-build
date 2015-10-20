@@ -65,10 +65,10 @@ Still Broken Tests:
 Test Suite Errors:
 -----------------
   {%- endif -%}
-  {%- for suiteError in errors['suiteErrors'] %}
-{{ classname }}: {{ suiteError['after'].type }}
+  {%- for suiteError in errors['suiteErrors']['after'] %}
+{{ classname }}: {{ suiteError.type }}
 ```
-{{ suiteError['after'].message }}
+{{ suiteError.message }}
 ```
   {%- endfor -%}
 {%- endfor -%}
