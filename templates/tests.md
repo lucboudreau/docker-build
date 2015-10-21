@@ -19,13 +19,13 @@ Test Suite Errors:
 Test Case Errors:
 -----------------
   {% endif %}
-  {%- for name, error in errors['caseErrors'].iteritems() -%}
+  {%- for name, error in errors['caseErrors'].iteritems() %}
 {{ classname }}.{{ name }}: {{ error.type }}
 ```
 {{ error.message }}
 ```
   {%- endfor -%}
-{%- endfor -%}
+{% endfor -%}
 
 {%- if fixed|length > 0 %}
 Newly Fixed Tests:
