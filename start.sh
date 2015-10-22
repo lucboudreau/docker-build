@@ -1,6 +1,7 @@
 #!/bin/bash
 
 chown -R buildguy:buildguy /home/buildguy/.m2/
+chown -R buildguy:buildguy /home/buildguy/.ivy2/
 chown -R buildguy:buildguy /home/buildguy/aggregate-metrics/
 
 echo "Fetching git repo as gitguy"
