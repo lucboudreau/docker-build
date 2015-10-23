@@ -4,7 +4,7 @@ import argparse
 import json
 import os
 import sys
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 from subprocess import call
 from urllib2 import urlopen, Request, HTTPError
 
@@ -42,22 +42,22 @@ def enrichJacoco(jacoco):
   return result
 
 if __name__ == '__main__':
-  os.chdir('/home/gitguy')
   parser = argparse.ArgumentParser(description='''
     This script will post a comment about the output of the build
   ''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument("-a", "--apiToken", help="Github api token")
+  parser.add_argument("-d", "--directory", default="/home/gitguy/aggregate-metrics", help="Directory containing json files to report on")
   parser.add_argument("-r", "--repository", help="Format: owner/repo")
   parser.add_argument("-p", "--pullRequest", help="Pull request number")
   parser.add_argument("-o", "--stdout", action='store_true', default=False, help="Print to stdout instead of posting")
   args, unknown = parser.parse_known_args()
-  with open('aggregate-metrics/checkstyle.json', 'r') as f:
+  with open('/'.join([args.directory, 'checkstyle.json']), 'r') as f:
     checkstyle = json.load(f)
-  with open('aggregate-metrics/tests.json', 'r') as f:
+  with open('/'.join([args.directory, 'tests.json']), 'r') as f:
     tests = json.load(f)
-  with open('aggregate-metrics/jacocoUnit.json', 'r') as f:
+  with open('/'.join([args.directory, 'jacocoUnit.json']), 'r') as f:
     jacocoUnit = json.load(f)
-  with open('aggregate-metrics/jacocoIntegration.json', 'r') as f:
+  with open('/'.join([args.directory, 'jacocoIntegration.json']), 'r') as f:
     jacocoIntegration = json.load(f)
 
   jacocoUnit = enrichJacoco(jacocoUnit)
@@ -65,7 +65,7 @@ if __name__ == '__main__':
   jacocoIntegration = enrichJacoco(jacocoIntegration)
   jacocoIntegration['header'] = "Integration test coverage change"
 
-  env = Environment(loader = PackageLoader('updatePr', 'templates'))
+  env = Environment(loader = FileSystemLoader('/'.join([os.path.dirname(os.path.realpath(__file__)), 'templates'])))
 
   comments = [
     env.get_template('checkstyle.md').render(checkstyle),

@@ -1,87 +1,32 @@
-{%- if broken|length > 0 %}
-Newly Broken Tests:
-=================
-{%- endif %}
-{% for classname, errors in broken.iteritems() if 'suiteErrors' in errors -%}
-  {%- if loop.index == 1 -%}
-Test Suite Errors:
------------------
-  {%- endif -%}
-  {%- for suiteError in errors['suiteErrors'] %}
-{{ classname }}: {{ suiteError.type }}
+{%- macro errorMd(className, testCase, errorType, errorMessage) -%}
+{{ className }}{% if testCase %}.{{ testCase }}{% endif %}: {{ errorType }}
 ```
-{{ suiteError.message }}
+{{ errorMessage }}
 ```
-  {%- endfor -%}
-{%- endfor -%}
-{% for classname, errors in broken.iteritems() if 'caseErrors' in errors -%}
-  {%- if loop.index == 1 -%}
-Test Case Errors:
------------------
-  {% endif %}
-  {%- for name, error in errors['caseErrors'].iteritems() %}
-{{ classname }}.{{ name }}: {{ error.type }}
-```
-{{ error.message }}
-```
-  {%- endfor -%}
-{% endfor -%}
+{%- endmacro -%}
 
-{%- if fixed|length > 0 %}
-Newly Fixed Tests:
-=================
-{%- endif %}
-{% for classname, errors in fixed.iteritems() if 'suiteErrors' in errors -%}
-  {%- if loop.index == 1 -%}
-Test Suite Errors:
+{%- macro errorsMd(header, errors) -%}
+  {%- if errors|length > 0 -%}
+{{ header }}:
 -----------------
-  {%- endif -%}
-  {%- for suiteError in errors['suiteErrors'] %}
-{{ classname }}: {{ suiteError.type }}
-```
-{{ suiteError.message }}
-```
-  {%- endfor -%}
-{%- endfor -%}
-{% for classname, errors in fixed.iteritems() if 'caseErrors' in errors -%}
-  {%- if loop.index == 1 -%}
-Test Case Errors:
------------------
-  {% endif %}
-  {%- for name, error in errors['caseErrors'].iteritems() -%}
-{{ classname }}.{{ name }}: {{ error.type }}
-```
-{{ error.message }}
-```
-  {%- endfor -%}
-{%- endfor -%}
+    {%- for classname, classErrors in errors.iteritems() -%}
+      {%- if 'caseErrors' in classErrors -%}
+        {% for name, error in classErrors['caseErrors'].iteritems() %}
+{{ errorMd(classname, name, error.type, error.message) }}
+        {%- endfor -%}
+      {%- endif -%}
 
-{%- if stillBroken|length > 0 %}
-Still Broken Tests:
-===================
-{%- endif %}
-{% for classname, errors in stillBroken.iteritems() if 'suiteErrors' in errors -%}
-  {%- if loop.index == 1 -%}
-Test Suite Errors:
------------------
+      {%- if 'suiteErrors' in classErrors -%}
+        {% for error in classErrors['suiteErrors'] %}
+{{ errorMd(classname, None, error.type, error.message) }}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
   {%- endif -%}
-  {%- for suiteError in errors['suiteErrors']['after'] %}
-{{ classname }}: {{ suiteError.type }}
-```
-{{ suiteError.message }}
-```
-  {%- endfor -%}
-{%- endfor -%}
-{% for classname, errors in stillBroken.iteritems() if 'caseErrors' in errors -%}
-  {%- if loop.index == 1 -%}
-Test Case Errors:
------------------
-  {% endif %}
-  {%- for name, error in errors['caseErrors'].iteritems() -%}
-{{ classname }}.{{ name }}: {{ error['after'].type }}
-```
-{{ error['after'].message }}
-```
-  {%- endfor -%}
-{%- endfor -%}
+{%- endmacro %}
+{{ errorsMd('Newly Broken Tests', broken)  }}
+
+{{ errorsMd('Newly Fixed Tests', fixed)  }}
+
+{{ errorsMd('Still Broken Tests', stillBroken)  }}
 

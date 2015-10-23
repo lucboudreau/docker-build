@@ -14,7 +14,7 @@ def diffCaseErrors(classname, before, after, result):
     if testname in before:
       createDictIfNecessary(result['stillBroken'], classname)
       createDictIfNecessary(result['stillBroken'][classname], 'caseErrors')
-      result['stillBroken'][classname]['caseErrors'][testname] = { 'before': before[testname], 'after': errors }
+      result['stillBroken'][classname]['caseErrors'][testname] = errors
     else:
       createDictIfNecessary(result['broken'], classname)
       result['broken'][classname]['caseErrors'] = errors
@@ -33,7 +33,7 @@ def diffClassErrors(classname, before, after, result):
   if 'suiteErrors' in after:
     if 'suiteErrors' in before:
       createDictIfNecessary(result['stillBroken'], classname)
-      result['stillBroken'][classname]['suiteErrors'] = { 'before': before['suiteErrors'], 'after': after['suiteErrors'] }
+      result['stillBroken'][classname]['suiteErrors'] = after['suiteErrors']
     else:
       createDictIfNecessary(result['broken'], classname)
       result['broken'][classname]['suiteErrors'] = after['suiteErrors']

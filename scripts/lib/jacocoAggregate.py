@@ -11,8 +11,9 @@ def coveragePercent(coverage):
     if key.endswith('Covered'):
       keyPrefix = key[:-len('Covered')]
       missed = keyPrefix + 'Missed'
-      total = int(value) + int(coverage[missed])
-      if total > 0:
+      intValue = int(value)
+      total = intValue + int(coverage[missed])
+      if intValue > 0:
         result[keyPrefix + 'PercentCoverage'] = (100 * int(value)) / float(total)
   return result;
 
