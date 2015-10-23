@@ -48,12 +48,12 @@ if __name__ == '__main__':
   api = 'https://api.github.com/repos/'
   api += args.repository
 
-  pr_info = get_pr_info(args.repository, args.pullRequest)
+  pr_info = get_pr_info(args.repository, args.pullRequest, args.apiToken)
   commits = pr_info['commits']
   headLabel = pr_info['head']['label']
   baseLabel = pr_info['base']['label']
   branch_to_apply = pr_info['base']['ref']
-  compare_info = get_compare_info(args.repository, headLabel, baseLabel)
+  compare_info = get_compare_info(args.repository, headLabel, baseLabel, args.apiToken)
 
   if not pr_info['merged'] and not pr_info['mergeable']:
     raise Exception('PR needs to be rebased to be mergeable')
