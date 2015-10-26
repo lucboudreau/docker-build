@@ -31,14 +31,15 @@ def get_compare_info(repo, headLabel, baseLabel, token = None):
   return api_request(''.join(['https://api.github.com/repos/', repo, '/compare/', headLabel, '...', baseLabel]), token)
 
 if __name__ == '__main__':
-  os.chdir('/home/gitguy')
   parser = argparse.ArgumentParser(description='''
     This script will pull down a pull request
   ''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument("-a", "--apiToken", help="Github api token")
+  parser.add_argument("-d", "--directory", default = '/home/gitguy', help="Working directory")
   parser.add_argument("-r", "--repository", help="Format: owner/repo")
   parser.add_argument("-p", "--pullRequest", help="Pull request number")
   args, unknown = parser.parse_known_args()
+  os.chdir(args.directory)
   if not args.repository or not args.pullRequest:
     parser.print_help()
     raise Exception('repository, pullRequest')
@@ -54,9 +55,12 @@ if __name__ == '__main__':
   baseLabel = pr_info['base']['label']
   branch_to_apply = pr_info['base']['ref']
   compare_info = get_compare_info(args.repository, headLabel, baseLabel, args.apiToken)
+  reverse_compare_info = get_compare_info(args.repository, baseLabel, headLabel, args.apiToken)
 
   if not pr_info['merged'] and not pr_info['mergeable']:
     raise Exception('PR needs to be rebased to be mergeable')
+  elif pr_info['merged']:
+    raise Exception('PR has already been merged')
   merge_commit_sha = pr_info['merge_commit_sha']
   repository = 'https://'
   if api_token:
@@ -68,6 +72,8 @@ if __name__ == '__main__':
   call_and_check(['git', 'config', '--global', 'user.email', 'docker-buildguy@pentaho.com'], "Couldn't set email")
   call_and_check(['git', 'config', '--global', 'user.name', 'docker-buildguy'], "Couldn't set email")
   call_and_check(['git', 'clone', '--depth=' + str(int(compare_info['ahead_by']) + 10), '--branch', branch_to_apply, repository, 'build-dir/base' ], "Couldn't clone repo")
+  with open(os.path.join(os.getcwd(), 'build-dir', 'diff.json'), 'w') as f:
+    json.dump([ diffFile['filename'] for diffFile in reverse_compare_info['files'] ], f)
   call_and_check(['cp', '-r', 'build-dir/base', 'build-dir/head' ], "Couldn't clone repo")
   os.chdir('build-dir/head')
   call_and_check(['git', 'fetch', '--depth=' + str(int(commits) + 10), 'origin', 'pull/' + str(args.pullRequest) + '/head:pullRequest'], "Couldn't fetch pr")

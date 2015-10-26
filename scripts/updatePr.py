@@ -51,6 +51,8 @@ if __name__ == '__main__':
   parser.add_argument("-p", "--pullRequest", help="Pull request number")
   parser.add_argument("-o", "--stdout", action='store_true', default=False, help="Print to stdout instead of posting")
   args, unknown = parser.parse_known_args()
+  with open('/'.join([args.directory, 'commands.json']), 'r') as f:
+    commands = json.load(f)
   with open('/'.join([args.directory, 'checkstyle.json']), 'r') as f:
     checkstyle = json.load(f)
   with open('/'.join([args.directory, 'tests.json']), 'r') as f:
@@ -68,6 +70,7 @@ if __name__ == '__main__':
   env = Environment(loader = FileSystemLoader('/'.join([os.path.dirname(os.path.realpath(__file__)), 'templates'])))
 
   comments = [
+    env.get_template('commands.md').render(commands),
     env.get_template('checkstyle.md').render(checkstyle),
     env.get_template('tests.md').render(tests),
     env.get_template('jacoco.md').render(jacocoUnit),
