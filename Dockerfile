@@ -1,7 +1,7 @@
 from cogniteev/oracle-java:java7
 
 RUN apt-get update
-RUN apt-get install -y git curl python python-jinja2
+RUN apt-get install -y git curl python python-jinja2 libswt-gtk-3-jni libswt-gtk-3-java
 
 RUN adduser --disabled-password --gecos '' buildguy
 RUN adduser --disabled-password --gecos '' gitguy
