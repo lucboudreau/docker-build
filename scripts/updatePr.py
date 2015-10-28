@@ -55,6 +55,8 @@ if __name__ == '__main__':
     commands = json.load(f)
   with open('/'.join([args.directory, 'checkstyle.json']), 'r') as f:
     checkstyle = json.load(f)
+  with open('/'.join([args.directory, 'headerViolations.json']), 'r') as f:
+    headerViolations = json.load(f)
   with open('/'.join([args.directory, 'tests.json']), 'r') as f:
     tests = json.load(f)
   with open('/'.join([args.directory, 'jacocoUnit.json']), 'r') as f:
@@ -72,6 +74,7 @@ if __name__ == '__main__':
   comments = [
     env.get_template('commands.md').render(commands),
     env.get_template('checkstyle.md').render(checkstyle),
+    env.get_template('headerViolations.md').render(headerViolations),
     env.get_template('tests.md').render(tests),
     env.get_template('jacoco.md').render(jacocoUnit),
     env.get_template('jacoco.md').render(jacocoIntegration)

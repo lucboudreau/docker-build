@@ -4,6 +4,8 @@ import argparse
 import json
 import os
 import sys
+import mmap
+import re
 from subprocess import call
 from urllib2 import urlopen, Request, HTTPError
 
@@ -81,6 +83,52 @@ def get_build_commands(manifest, project, diff, head):
     result['finally'] = afterAll
   return result
 
+
+
+def checkHeaders(diffPath, violationsFile):
+  with open(diffPath) as diffFile:
+    diff = json.load(diffFile)
+    buildFiles = set([])
+    for diffFile in diff:
+      if diffFile.endswith(".java"):
+        buildFiles.add(diffFile)
+    buildFiles = [buildFile for buildFile in buildFiles]
+    buildFiles.sort()
+    violations = []
+    for javaFile in buildFiles:
+      if os.path.exists(javaFile):
+        f = open(javaFile)
+        s = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+        if not re.search(br'copyright', s, re.IGNORECASE):
+          # missing copyright
+          violations.append(javaFile)
+        elif not re.search(br'Licensed under the Apache License', s, re.IGNORECASE):
+          # doesn't have apache license
+          if not re.search(br'GNU Lesser General Public License', s, re.IGNORECASE):
+            # doesn't have LGPL
+            if not re.search(br'GNU General Public License', s, re.IGNORECASE):
+              # doesn't have GPL
+              if not re.search(br'PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL', s, re.IGNORECASE):
+                # doesn't have any known license
+                violations.append(javaFile)
+    violations_json = ''
+    for violation in violations:
+      print "License header missing: " + violation
+      if violations_json == '':
+        violations_json = '{"violations":['
+      else:
+        violations_json += ','
+      violations_json += '{"file":"' + violation + '"}'
+    violations_json += ']}'
+
+    header_violations_file = open(violationsFile, "w+")
+    header_violations_file.write(violations_json)
+    header_violations_file.close()
+
+
+
+
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='''
     This script will pull down a pull request, build it, and compare it against master
@@ -116,8 +164,10 @@ if __name__ == '__main__':
   finally:
     if 'finally' in buildCommands:
       call_and_check(buildCommands['finally'], "Cleanup failed", shell = True)
+
   try:
     os.chdir('../head')
+    checkHeaders(args.directory + '/build-dir/diff.json', '/home/buildguy/aggregate-metrics/headerViolations.json')
     for buildCommand in buildCommands['build']:
       call_and_check(buildCommand, "Build failed", shell = True)
     call_and_check('cat checkdiff.out | xargs /scripts/lib/checkstyle.py > ~/aggregate-metrics/checkstyle.json', 'Couldn\'t aggregate checkstyle output', shell= True)
