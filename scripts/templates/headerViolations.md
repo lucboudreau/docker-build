@@ -1,8 +1,9 @@
+
 License header violations:
 ==========================
 {%- for violation in violations %}
 {{ loop.index }}. {{ violation.file }}
 {%- else %}
-No errors found
+No violations found
 {% endfor -%}
 

@@ -119,7 +119,8 @@ def checkHeaders(diffPath, violationsFile):
       else:
         violations_json += ','
       violations_json += '{"file":"' + violation + '"}'
-    violations_json += ']}'
+    if violations_json == '':
+      violations_json += '{"violations":[]}'
 
     header_violations_file = open(violationsFile, "w+")
     header_violations_file.write(violations_json)
