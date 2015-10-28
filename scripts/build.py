@@ -98,7 +98,7 @@ if __name__ == '__main__':
     with open('diff.json') as diffFile:
       buildCommands = get_build_commands(json.loads(args.metadata), args.repository, json.load(diffFile), 'head')
   elif args.buildCommand and args.cleanupCommand:
-    buildCommands = { 'build': args.buildCommand, 'finally': args.cleanupCommand }
+    buildCommands = { 'build': [args.buildCommand], 'finally': args.cleanupCommand }
   else:
     parser.print_help()
     raise Exception('buildCommand, and cleanupCommand are required')
