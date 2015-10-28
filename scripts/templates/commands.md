@@ -6,7 +6,7 @@ Build:
 {{ loop.index }}. {{ command }}
 {% endfor %}
 {% if finally -%}
-Finally:
+Cleanup:
 -------
 {{ finally }}
 {% endif %}
