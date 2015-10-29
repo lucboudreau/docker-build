@@ -1,25 +1,12 @@
 #!/usr/bin/env python
 
 import argparse
-import json
 import os
-import sys
 import types
-from urllib2 import urlopen, Request, HTTPError
 
 from lib.fs import chown, cp
 from lib.rest import api_request
-from lib.shell import call_and_check
-
-def add_args(args, cmd, flags):
-  result = [ string for string in cmd ]
-  for flag in flags:
-    if flag in args and args[flag]:
-      if type(args[flag]) == types.BooleanType:
-        result.append('--' + flag)
-      else:
-        result.extend(['--' + flag, str(args[flag])])
-  return result
+from lib.shell import call_and_check, add_args
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='''
