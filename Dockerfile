@@ -19,12 +19,10 @@ ADD scripts /scripts/
 RUN chmod a+x /scripts/*.py
 
 ADD settings.xml /home/buildguy/.m2/
-ADD start.sh /root/
 RUN mkdir /home/buildguy/aggregate-metrics
 RUN mkdir /home/buildguy/.ivy2
-RUN chmod +x /root/start.sh
 
 RUN chown -R gitguy:gitguy ~gitguy/
 RUN chown -R buildguy:buildguy ~buildguy/
 
-ENTRYPOINT ["/root/start.sh"]
+ENTRYPOINT ["python", "/scripts/start.py"]
