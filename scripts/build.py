@@ -6,13 +6,9 @@ import os
 import sys
 import mmap
 import re
-from subprocess import call
 from urllib2 import urlopen, Request, HTTPError
 
-def call_and_check(command, error_message, shell=False):
-  result = call(command, shell=shell)
-  if result != 0:
-    raise Exception(error_message)
+from lib.shell import call_and_check
 
 def get_build_prop(buildTools, buildTool, propName):
   result = None
