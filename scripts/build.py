@@ -10,6 +10,7 @@ from urllib2 import urlopen, Request, HTTPError
 
 from lib.shell import call_and_check
 from lib.headers import checkHeaders
+from lib.mvn import findModules
 
 def get_build_prop(buildTools, buildTool, propName):
   result = None
@@ -59,19 +60,27 @@ def get_build_commands(manifest, project, diff, head):
         break
   buildFiles = [buildFile for buildFile in buildFiles]
   buildFiles.sort()
+  multimoduleOrder = []
   if project in manifest['projects']:
     if 'multimoduleOrder' in manifest['projects'][project]:
       multimoduleOrder = [module for module in manifest['projects'][project]['multimoduleOrder']]
-      buildOrder = {}
-      for buildFile in buildFiles:
-        lastMatch = ''
-        for idx, val in enumerate(multimoduleOrder):
-          if buildFile.startswith(val) and len(lastMatch) < len(val):
-            buildOrder[buildFile] = idx
-            lastMatch = val
-        if buildFile not in buildOrder:
-          buildOrder[buildFile] = len(multimoduleOrder)
-      buildFiles.sort(key = lambda buildFile: ( buildOrder[buildFile], buildFile ) )
+  if get_build_prop(buildTools, buildTool, 'build-file') == 'pom.xml':
+    for module in findModules(head):
+      module = os.path.relpath(module, head)
+      if module == '.':
+        module = ''
+      multimoduleOrder.append(module)
+  if len(multimoduleOrder) > 0:
+    buildOrder = {}
+    for buildFile in buildFiles:
+      lastMatch = ''
+      for idx, val in enumerate(multimoduleOrder):
+        if buildFile.startswith(val) and len(lastMatch) < len(val):
+          buildOrder[buildFile] = idx
+          lastMatch = val
+      if buildFile not in buildOrder:
+        buildOrder[buildFile] = len(multimoduleOrder)
+    buildFiles.sort(key = lambda buildFile: ( buildOrder[buildFile], buildFile ) )
   for buildFile in buildFiles:
     buildCommands.append(buildCommand.replace('BUILD_FILE', buildFile))
   afterAll = get_build_prop(buildTools, buildTool, 'finally')
