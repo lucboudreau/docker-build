@@ -25,11 +25,8 @@ def findCoverage(jacocoCsv, result):
         result[row['GROUP']] = {}
       result[row['GROUP']][row['PACKAGE'] + '.' + row['CLASS']] = row_result
 
-if __name__ == '__main__':
+def findCoverageList(jacocoCsvs):
   result = {}
-  for jacocoCsv in sys.argv[1:]:
-    jacocoCsv = jacocoCsv.strip()
-    if len(jacocoCsv) > 0:
-      findCoverage(jacocoCsv, result)
-  result = { k: v for k, v in result.iteritems() if len(v) > 0 }
-  print(json.dumps(result, sort_keys = True, indent = 2))
+  for jacocoCsv in jacocoCsvs:
+    findCoverage(jacocoCsv, result)
+  return { k: v for k, v in result.iteritems() if len(v) > 0 }

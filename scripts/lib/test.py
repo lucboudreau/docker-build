@@ -32,11 +32,8 @@ def findFailuresAndErrors(filename, result):
       result[className]['caseErrors'][name] = parseElement(failure, 'failure')
   return result
 
-if __name__ == '__main__':
+def findFailuresAndErrorsList(filenames):
   result = {}
-  for testXml in sys.argv[1:]:
-    textXml = testXml.strip()
-    if len(testXml) > 0:
-      findFailuresAndErrors(testXml, result)
-  result = { k: v for k, v in result.iteritems() if len(v) > 0 }
-  print(json.dumps(result, sort_keys = True, indent = 2))
+  for testXml in filenames:
+    findFailuresAndErrors(testXml, result)
+  return { k: v for k, v in result.iteritems() if len(v) > 0 }

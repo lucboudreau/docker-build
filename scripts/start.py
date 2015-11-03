@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import types
 
 from lib.fs import chown, cp
 from lib.rest import api_request
