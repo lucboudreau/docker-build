@@ -13,6 +13,7 @@ RUN echo 'export JAVA_HOME=/usr/lib/jvm/java-7-oracle' >> ~buildguy/.profile
 RUN echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~buildguy/.profile
 RUN echo 'export PATH="/home/buildguy/apache-ant-1.9.6/bin:$PATH"' >> ~buildguy/.profile
 RUN echo 'export PATH="/home/buildguy/apache-maven-3.3.3/bin:$PATH"' >> ~buildguy/.profile
+RUN echo 'export ANT_OPTS="-XX:MaxPermSize=256m"' >> ~buildguy/.profile
 RUN mkdir ~buildguy/.ssh/
 
 ADD scripts /scripts/
