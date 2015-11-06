@@ -7,6 +7,7 @@ import sys
 from jinja2 import Environment, FileSystemLoader
 from urllib2 import urlopen, Request, HTTPError
 
+from lib.log import configureLog
 from lib.rest import post_comment
 
 def enrichJacoco(jacoco):
@@ -30,7 +31,9 @@ if __name__ == '__main__':
   parser.add_argument("-r", "--repository", help="Format: owner/repo")
   parser.add_argument("-p", "--pullRequest", help="Pull request number")
   parser.add_argument("-o", "--stdout", action='store_true', default=False, help="Print to stdout instead of posting")
+  parser.add_argument("-l", "--logLevel", default='INFO', help="Log level")
   args, unknown = parser.parse_known_args()
+  configureLog(args.logLevel)
   with open('/'.join([args.directory, 'commands.json']), 'r') as f:
     commands = json.load(f)
   with open('/'.join([args.directory, 'checkstyle.json']), 'r') as f:

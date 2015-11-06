@@ -9,8 +9,9 @@ import mmap
 import re
 from urllib2 import urlopen, Request, HTTPError
 
-from lib.fs import find
-from lib.shell import call_and_check
+from lib.fs import FsHelper
+from lib.log import configureLog
+from lib.shell import ShellHelper
 from lib.headers import checkHeaders
 from lib.mvn import findModules
 from lib.test import findFailuresAndErrorsList
@@ -97,18 +98,18 @@ ant_test_pattern = re.compile('.*bin/reports/[^/]*test/xml.*\\.xml$')
 failsafe_test_pattern = re.compile('.*/failsafe-reports/.*\\.xml$')
 surefire_test_pattern = re.compile('.*/surefire-reports/.*\\.xml$')
 
-def findTests():
-  return find(lambda f: not f['isDir'] and (ant_test_pattern.match(f['name']) or surefire_test_pattern.match(f['name']) or failsafe_test_pattern.match(f['name'])))
+def findTests(fs):
+  return fs.find(lambda f: not f['isDir'] and (ant_test_pattern.match(f['name']) or surefire_test_pattern.match(f['name']) or failsafe_test_pattern.match(f['name'])))
 
 jacoco_pattern = re.compile('.*/jacoco/.*csv$')
 
-def findJacoco():
-  return find(lambda f: not f['isDir'] and jacoco_pattern.match(f['name']))
+def findJacoco(fs):
+  return fs.find(lambda f: not f['isDir'] and jacoco_pattern.match(f['name']))
 
 jacoco_it_pattern = re.compile('.*/jacoco-integration/.*csv$')
 
-def findJacocoIT():
-  return find(lambda f: not f['isDir'] and jacoco_it_pattern.match(f['name']))
+def findJacocoIT(fs):
+  return fs.find(lambda f: not f['isDir'] and jacoco_it_pattern.match(f['name']))
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='''
@@ -119,7 +120,11 @@ if __name__ == '__main__':
   parser.add_argument("-m", "--metadata", help="Metadata (automatic build target detection)")
   parser.add_argument("-r", "--repository", help="Repository")
   parser.add_argument("-d", "--directory", default='/home/buildguy', help="base-dir")
+  parser.add_argument("-l", "--logLevel", default='INFO', help="Log level")
   args, unknown = parser.parse_known_args()
+  configureLog(args.logLevel)
+  shell = ShellHelper()
+  fs = FsHelper(shell)
   os.chdir(args.directory + '/build-dir')
   if args.metadata:
     if not args.repository:
@@ -141,22 +146,22 @@ if __name__ == '__main__':
     os.chdir(args.directory + '/build-dir/base')
 
     for buildCommand in buildCommands['build']:
-      call_and_check(buildCommand, "Build failed", shell = True)
+      shell.call_and_check(buildCommand, "Build failed", shell = True)
 
-    old_tests = findFailuresAndErrorsList(findTests())
+    old_tests = findFailuresAndErrorsList(findTests(fs))
     with open(args.directory + '/aggregate-metrics/working-dir/beforeTests.json', 'w') as of:
       json.dump(old_tests, of)
 
-    old_jacoco = findCoverageList(findJacoco())
+    old_jacoco = findCoverageList(findJacoco(fs))
     with open(args.directory + '/aggregate-metrics/working-dir/jacocoUnitBefore.json', 'w') as of:
       json.dump(old_jacoco, of)
 
-    old_jacoco_it = findCoverageList(findJacocoIT())
+    old_jacoco_it = findCoverageList(findJacocoIT(fs))
     with open(args.directory + '/aggregate-metrics/working-dir/jacocoIntegrationBefore.json', 'w') as of:
       json.dump(old_jacoco_it, of)
   finally:
     if 'finally' in buildCommands:
-      call_and_check(buildCommands['finally'], "Cleanup failed", shell = True)
+      shell.call_and_check(buildCommands['finally'], "Cleanup failed", shell = True)
 
   try:
     os.chdir('../head')
@@ -164,25 +169,25 @@ if __name__ == '__main__':
       json.dump(checkHeaders(args.directory + '/build-dir/diff.json'), violationsFile)
 
     for buildCommand in buildCommands['build']:
-      call_and_check(buildCommand, "Build failed", shell = True)
+      shell.call_and_check(buildCommand, "Build failed", shell = True)
 
-    call_and_check('cat checkdiff.out | xargs /scripts/lib/checkstyle.py > ~/aggregate-metrics/checkstyle.json', 'Couldn\'t aggregate checkstyle output', shell= True)
+    shell.call_and_check('cat checkdiff.out | xargs /scripts/lib/checkstyle.py > ~/aggregate-metrics/checkstyle.json', 'Couldn\'t aggregate checkstyle output', shell= True)
 
-    new_tests = findFailuresAndErrorsList(findTests())
+    new_tests = findFailuresAndErrorsList(findTests(fs))
     with open(args.directory + '/aggregate-metrics/working-dir/afterTests.json', 'w') as of:
       json.dump(new_tests, of)
 
-    new_jacoco = findCoverageList(findJacoco())
+    new_jacoco = findCoverageList(findJacoco(fs))
     with open(args.directory + '/aggregate-metrics/working-dir/jacocoUnitAfter.json', 'w') as of:
       json.dump(new_jacoco, of)
 
-    new_jacoco_it = findCoverageList(findJacocoIT())
+    new_jacoco_it = findCoverageList(findJacocoIT(fs))
     with open(args.directory + '/aggregate-metrics/working-dir/jacocoIntegrationAfter.json', 'w') as of:
       json.dump(new_jacoco_it, of)
     
-    call_and_check('python /scripts/lib/testAggregate.py -b ~/aggregate-metrics/working-dir/beforeTests.json -a ~/aggregate-metrics/working-dir/afterTests.json > ~/aggregate-metrics/tests.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
-    call_and_check('python /scripts/lib/jacocoAggregate.py -b ~/aggregate-metrics/working-dir/jacocoUnitBefore.json -a ~/aggregate-metrics/working-dir/jacocoUnitAfter.json > ~/aggregate-metrics/jacocoUnit.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
-    call_and_check('python /scripts/lib/jacocoAggregate.py -b ~/aggregate-metrics/working-dir/jacocoIntegrationBefore.json -a ~/aggregate-metrics/working-dir/jacocoIntegrationAfter.json > ~/aggregate-metrics/jacocoIntegration.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
+    shell.call_and_check('python /scripts/lib/testAggregate.py -b ~/aggregate-metrics/working-dir/beforeTests.json -a ~/aggregate-metrics/working-dir/afterTests.json > ~/aggregate-metrics/tests.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
+    shell.call_and_check('python /scripts/lib/jacocoAggregate.py -b ~/aggregate-metrics/working-dir/jacocoUnitBefore.json -a ~/aggregate-metrics/working-dir/jacocoUnitAfter.json > ~/aggregate-metrics/jacocoUnit.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
+    shell.call_and_check('python /scripts/lib/jacocoAggregate.py -b ~/aggregate-metrics/working-dir/jacocoIntegrationBefore.json -a ~/aggregate-metrics/working-dir/jacocoIntegrationAfter.json > ~/aggregate-metrics/jacocoIntegration.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
   finally:
     if 'finally' in buildCommands:
-      call_and_check(buildCommands['finally'], "Cleanup failed", shell = True)
+      shell.call_and_check(buildCommands['finally'], "Cleanup failed", shell = True)
