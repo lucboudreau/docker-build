@@ -4,13 +4,14 @@ Changed files:
   {{file}}
 {%- endfor %}
 
+{% if violations|length > 0 %}
 Checkstyle violations:
 ======================
-{%- for violation in violations %}
+See: https://github.com/pentaho/pentaho-coding-standards
+{% for violation in violations %}
 File {{ violation.filename }}
 {% for error in violation.errors -%}
 {{ loop.index }}. Message: {{error.message}} at Line: {{ error.line }} Column: {{ error.column }}
 {% endfor -%}
-{%- else %}
-No errors found
 {%- endfor -%}
+{%- endif -%}
