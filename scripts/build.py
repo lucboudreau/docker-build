@@ -102,14 +102,16 @@ def findTests(fs):
   return fs.find(lambda f: not f['isDir'] and (ant_test_pattern.match(f['name']) or surefire_test_pattern.match(f['name']) or failsafe_test_pattern.match(f['name'])))
 
 jacoco_pattern = re.compile('.*/jacoco/.*csv$')
+jacoco_unit_pattern = re.compile('.*/jacoco-unit/.*csv$')
 
 def findJacoco(fs):
-  return fs.find(lambda f: not f['isDir'] and jacoco_pattern.match(f['name']))
+  return fs.find(lambda f: not f['isDir'] and (jacoco_pattern.match(f['name']) or jacoco_unit_pattern.match(f['name'])))
 
-jacoco_it_pattern = re.compile('.*/jacoco-integration/.*csv$')
+jacoco_it_pattern = re.compile('.*/jacoco-it/.*csv$')
+jacoco_integration_pattern = re.compile('.*/jacoco-integration/.*csv$')
 
 def findJacocoIT(fs):
-  return fs.find(lambda f: not f['isDir'] and jacoco_it_pattern.match(f['name']))
+  return fs.find(lambda f: not f['isDir'] and (jacoco_it_pattern.match(f['name']) or jacoco_integration_pattern.match(f['name'])))
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='''
