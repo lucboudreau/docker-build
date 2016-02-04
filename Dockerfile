@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* 
   ENV LANG en_US.utf8
 
 RUN apt-get update
-RUN apt-get install -y git curl python python-jinja2 libswt-gtk-3-jni libswt-gtk-3-java
+RUN apt-get install -y git curl python python-jinja2 libswt-gtk-3-jni libswt-gtk-3-java nodejs npm
 
 RUN adduser --disabled-password --gecos '' buildguy
 RUN adduser --disabled-password --gecos '' gitguy
@@ -31,4 +31,7 @@ RUN mkdir /home/buildguy/.ivy2
 RUN chown -R gitguy:gitguy ~gitguy/
 RUN chown -R buildguy:buildguy ~buildguy/
 
+RUN ln -s /usr/bin/nodejs /usr/bin/node
+
 ENTRYPOINT ["python", "/scripts/start.py"]
+#ENTRYPOINT ["bash"]
