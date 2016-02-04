@@ -97,9 +97,10 @@ def get_build_commands(manifest, project, diff, head):
 ant_test_pattern = re.compile('.*bin/reports/[^/]*test/xml.*\\.xml$')
 failsafe_test_pattern = re.compile('.*/failsafe-reports/.*\\.xml$')
 surefire_test_pattern = re.compile('.*/surefire-reports/.*\\.xml$')
+js_test_pattern = re.compile('.*bin/reports/[^/]*test/js.*\\.xml$')
 
 def findTests(fs):
-  return fs.find(lambda f: not f['isDir'] and (ant_test_pattern.match(f['name']) or surefire_test_pattern.match(f['name']) or failsafe_test_pattern.match(f['name'])))
+  return fs.find(lambda f: not f['isDir'] and (ant_test_pattern.match(f['name']) or surefire_test_pattern.match(f['name']) or failsafe_test_pattern.match(f['name']) or js_test_pattern.match(f['name'])))
 
 jacoco_pattern = re.compile('.*/jacoco/.*csv$')
 jacoco_unit_pattern = re.compile('.*/jacoco-unit/.*csv$')
@@ -186,7 +187,7 @@ if __name__ == '__main__':
     new_jacoco_it = findCoverageList(findJacocoIT(fs))
     with open(args.directory + '/aggregate-metrics/working-dir/jacocoIntegrationAfter.json', 'w') as of:
       json.dump(new_jacoco_it, of)
-    
+
     shell.call_and_check('python /scripts/lib/testAggregate.py -b ~/aggregate-metrics/working-dir/beforeTests.json -a ~/aggregate-metrics/working-dir/afterTests.json > ~/aggregate-metrics/tests.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
     shell.call_and_check('python /scripts/lib/jacocoAggregate.py -b ~/aggregate-metrics/working-dir/jacocoUnitBefore.json -a ~/aggregate-metrics/working-dir/jacocoUnitAfter.json > ~/aggregate-metrics/jacocoUnit.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
     shell.call_and_check('python /scripts/lib/jacocoAggregate.py -b ~/aggregate-metrics/working-dir/jacocoIntegrationBefore.json -a ~/aggregate-metrics/working-dir/jacocoIntegrationAfter.json > ~/aggregate-metrics/jacocoIntegration.json', 'Couldn\'t aggregate surefire output after merge', shell= True)
