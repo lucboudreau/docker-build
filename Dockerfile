@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* 
   ENV LANG en_US.utf8
 
 RUN apt-get update
-RUN apt-get install -y git curl python python-jinja2 libswt-gtk-3-jni libswt-gtk-3-java nodejs npm
+RUN apt-get install -y git curl python python-jinja2 libswt-gtk-3-jni libswt-gtk-3-java nodejs npm libaio1
 
 RUN adduser --disabled-password --gecos '' buildguy
 RUN adduser --disabled-password --gecos '' gitguy
