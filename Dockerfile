@@ -1,4 +1,4 @@
-from cogniteev/oracle-java:java7
+from cogniteev/oracle-java:java8
 
 # make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
 RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
