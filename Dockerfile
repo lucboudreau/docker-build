@@ -14,7 +14,7 @@ RUN adduser --disabled-password --gecos '' gitguy
 RUN sudo -u buildguy bash -c "cd /home/buildguy && curl http://www.apache.org/dist/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.tar.gz | tar -xz"
 RUN sudo -u buildguy bash -c "cd /home/buildguy && curl https://www.apache.org/dist/ant/binaries/apache-ant-1.9.6-bin.tar.gz | tar -xz"
 
-RUN echo 'export JAVA_HOME=/usr/lib/jvm/java-7-oracle' >> ~buildguy/.profile
+RUN echo 'export JAVA_HOME=/usr/lib/jvm/java-8-oracle' >> ~buildguy/.profile
 RUN echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~buildguy/.profile
 RUN echo 'export PATH="/home/buildguy/apache-ant-1.9.6/bin:$PATH"' >> ~buildguy/.profile
 RUN echo 'export PATH="/home/buildguy/apache-maven-3.3.3/bin:$PATH"' >> ~buildguy/.profile
