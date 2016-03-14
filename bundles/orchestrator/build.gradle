@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':bundles:api')
+    compile project(':bundles:util:template')
+    compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+}

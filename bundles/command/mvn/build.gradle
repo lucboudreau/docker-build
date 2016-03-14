@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':bundles:api')
+    compile project(':bundles:util:config')
+}

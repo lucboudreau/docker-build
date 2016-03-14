@@ -1,0 +1,20 @@
+apply plugin: 'idea'
+
+subprojects {
+  group = 'com.github.brosander.build.buddy'
+  version = '0.0.1'
+
+  ext.cxfVersion = '3.1.5'
+  ext.karafVersion = '4.0.4'
+  ext.jacksonVersion = '2.7.2'
+
+  repositories {
+    mavenCentral()
+  }
+}
+
+idea {
+  project {
+    languageLevel = '1.7'
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "SourceRetriever": [
+    [ {"SourceRetriever": { "SourceControlType": null } }, {"SourceRetriever": { "SourceControlType": "github"} } ],
+    [ {"SourceRetriever": { "SourceControlType": "github", "ApiToken": null } }, {"SourceRetriever": { "ApiToken": "${GITHUB_API_TOKEN}"} } ],
+    [ {"SourceRetriever": { "SourceControlType": "github", "Organization": null } }, {"SourceRetriever": { "Organization": "pentaho" } } ]
+  ],
+  "StatusUpdater": [
+    [ {"StatusUpdater": null }, {"StatusUpdater": {} } ],
+    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": null } }, {"StatusUpdater": { "StatusUpdaterType": "github"} } ],
+    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "ApiToken": null } }, {"StatusUpdater": { "ApiToken": "#{SourceRetriever.ApiToken}" } } ],
+    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "Organization": null } }, {"StatusUpdater": { "Organization": "#{SourceRetriever.Organization}" } } ],
+    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "Repository": null } }, {"StatusUpdater": { "Repository": "#{SourceRetriever.Repository}" } } ],
+    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "PullRequest": null } }, {"StatusUpdater": { "PullRequest": "#{SourceRetriever.PullRequest}" } } ]
+  ],
+  "CommandBuilder": [
+    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "data-access"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle"}} ],
+    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pdi-platform-utils-plugin"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle"}} ],
+    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-analyzer"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=512m -Djs.karma.failonerror=false -f BUILD_FILE clean-all resolve jacoco test-js checkstyle"}} ],
+    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-commons-database"}}, {"CommandBuilder": { "BuildTool": "ant" }} ],
+    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-kettle"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["core", "engine", "dbdialog", "ui", "plugins"]}} ],
+    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["api", "core", "repository", "scheduler", "extensions", "user-console", "assembly"]}} ],
+    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform-plugin-dashboards"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle"}} ],
+    [ {"CommandBuilder": null}, {"CommandBuilder": { "BuildTool": "mvn"}}],
+    [ {"CommandBuilder": { "BuildTool": "mvn", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "mvn -B -fn -DrunITs=true -f BUILD_FILE clean install && mvn -B -Dpentaho-coding-standards.version=1.0.4 -f BUILD_FILE site"}}],
+    [ {"CommandBuilder": { "BuildTool": "mvn", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "mvn -B build-helper:remove-project-artifact"} } ],
+    [ {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle publish-local"}}],
+    [ {"CommandBuilder": { "BuildTool": "ant", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "rm -r ~/.ivy2/local || echo no publish local to remove"} } ]
+  ],
+  "BuildRunner": [
+    [ {"BuildRunner": null}, {"BuildRunner": { "RunnerType": "Docker"}}],
+    [ {"SourceRetriever": { "Branch": "master" }, "BuildRunner": { "RunnerType": "Docker", "Container": null }}, {"BuildRunner": { "Container": "build-buddy-8" }}],
+    [ {"BuildRunner": { "RunnerType": "Docker", "Container": null }}, {"BuildRunner": { "Container": "build-buddy-7" }}],
+    [ {"BuildRunner": { "RunnerType": "Docker", "Volumes": null }}, {"BuildRunner": { "Volumes": {
+        "/tmp/m2rep-THREAD_NAME": "/home/buildguy/.m2/repository",
+        "/tmp/ivy2rep-THREAD_NAME": "/home/buildguy/.ivy2"
+    }}}]
+  ]
+}

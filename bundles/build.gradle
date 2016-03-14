@@ -1,0 +1,37 @@
+subprojects {
+  if (project.file('build.gradle').exists()) {
+    apply plugin: 'idea'
+    apply plugin: 'java'
+    apply plugin: 'osgi'
+
+    configurations {
+        provided
+        providedPlusCompile.extendsFrom(compile, provided)
+    }
+
+    sourceSets.main {
+        compileClasspath = configurations.providedPlusCompile
+    }
+
+    idea {
+        module {
+            scopes.PROVIDED.plus += [configurations.provided]
+        }
+    }
+
+    dependencies {
+        provided 'org.ops4j.pax.logging:pax-logging-api:1.8.5'
+        testCompile 'junit:junit:4.12'
+        testCompile 'org.mockito:mockito-all:1.10.19'
+    }
+
+    /*task printClasspath << {
+        sourceSets.main.compileClasspath.each {
+            println it
+        }
+    }
+
+    compileJava.dependsOn printClasspath
+    */
+  }
+}

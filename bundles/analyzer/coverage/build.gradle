@@ -1,0 +1,5 @@
+dependencies {
+  compile project(':bundles:api')
+  compile project(':bundles:util:template')
+  compile 'org.apache.commons:commons-csv:1.2'
+}

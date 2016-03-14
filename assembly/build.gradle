@@ -1,0 +1,181 @@
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
+
+apply plugin: 'distribution'
+
+configurations {
+    bundles
+    features { transitive = false }
+    karaf { transitive = false }
+}
+
+ext.dependentFeatures = [[name: 'cxf', version: cxfVersion]]
+
+dependencies {
+    karaf group:'org.apache.karaf', name: 'apache-karaf', version:karafVersion, ext:'zip'
+    findBundles(project(':bundles')).each {
+        bundles it
+    }
+
+    features group: 'org.apache.cxf.karaf', name: 'apache-cxf', version: cxfVersion, ext: 'xml', classifier: 'features'
+}
+
+distributions {
+    main {
+        contents {
+            duplicatesStrategy = 'exclude'
+            from ("build/apache-karaf-${karafVersion}") {
+                exclude 'etc/org.apache.karaf.features.cfg'
+            }
+            from ("build/repository") {
+                into("system")
+            }
+            from ("build/etc") {
+                into("etc")
+            }
+            from ("src/main/assembly") {
+                into(".")
+            }
+        }
+    }
+}
+
+task patchEgitManifest << {
+    def egit = file('build/repository/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5.jar')
+    def tmp = file('build/egit.tmp.jar')
+    assert egit.renameTo(tmp)
+    tmp.deleteOnExit()
+
+    def oldJar = new JarFile(tmp)
+    def manifest = oldJar.getManifest()
+    def oldImport = manifest.getMainAttributes().getValue("Import-Package")
+    if (!oldImport.endsWith('"')) {
+        oldImport += '"'
+    }
+    manifest.getMainAttributes().putValue("Import-Package", oldImport)
+    def newJarOs = new FileOutputStream(egit)
+    try {
+        def egitOut = new JarOutputStream(newJarOs, manifest)
+        try {
+            oldJar.entries().each {
+                if (!"META-INF/MANIFEST.MF".equals(it.getName())) {
+                    egitOut.putNextEntry(new JarEntry(it))
+                    egitOut << oldJar.getInputStream(it).bytes
+                    egitOut.closeEntry()
+                }
+            }
+        } finally {
+            egitOut.close()
+        }
+    } finally {
+        newJarOs.close()
+    }
+    oldJar.close()
+    assert tmp.delete()
+}
+
+task updateFeaturesCfg << {
+    def cfgPath = 'etc/org.apache.karaf.features.cfg'
+    def properties = new Properties()
+    properties.load(new FileReader(file("build/apache-karaf-${karafVersion}/${cfgPath}")))
+    def repositories = properties.getProperty('featuresRepositories')
+    configurations.features.resolvedConfiguration.resolvedArtifacts.collect {
+        repositories += ", mvn:${it.moduleVersion.id.group}/${it.name}/${it.moduleVersion.id.version}/xml/features"
+    }
+    repositories += ", mvn:${project.group}/build-buddy-feature/${project.version}/xml/features"
+    properties.setProperty("featuresRepositories", repositories)
+    properties.setProperty("featuresBoot", "${properties.getProperty('featuresBoot')}, build-buddy")
+    def outputFile = file("build/${cfgPath}")
+    outputFile.parentFile.mkdirs()
+    properties.store(new FileWriter(outputFile), "Updated programmatically by gradle build")
+}
+
+task unzipKaraf(type: Copy) {
+    from({ configurations.karaf.collect { zipTree(it) } })
+    into("build")
+}
+
+// https://discuss.gradle.org/t/copy-dependencies-into-maven-style-directory-structure-to-create-kar-archive/6365/4
+task copyDepsInMavenStructure(type: Copy) {
+    destinationDir = project.buildDir
+
+    into('repository') {
+        def fileRenameMap = [:]
+
+        def depClosure = { dependency ->
+            def groupAsPath = dependency.moduleVersion.id.group.replace('.' as char, File.separatorChar)
+            def version = dependency.moduleVersion.id.version
+            fileRenameMap[dependency.file.name] = getMvnFileName(groupAsPath, dependency.name, version, dependency.type, null)
+            dependency.file
+        }
+
+        from ({configurations.bundles.resolvedConfiguration.resolvedArtifacts.collect depClosure })
+        from ({configurations.features.resolvedConfiguration.resolvedArtifacts.collect depClosure })
+
+        rename { oldName -> fileRenameMap[oldName] }
+    }
+}
+
+task generateFeatureFile << {
+    def name = 'build-buddy-feature'
+    def featureFile = file("build/repository/${getMvnFileName(project.group.replace('.' as char, File.separatorChar), name, project.version, 'xml', 'features')}")
+    featureFile.parentFile.mkdirs()
+    def writer = new FileWriter(featureFile)
+    try {
+        def xml = new groovy.xml.MarkupBuilder(writer).features('name': 'build-buddy-features', 'xmlns': 'http://karaf.apache.org/xmlns/features/v1.0.0') {
+            feature('name': 'build-buddy', 'version': project.version) {
+                dependentFeatures.each {
+                    feature(version: it.version, it.name)
+                }
+                configurations.bundles.resolvedConfiguration.resolvedArtifacts.each {
+                    def prefix = "mvn"
+                    def startLevel = "85"
+
+                    /*if ('org.eclipse.egit.github.core'.equals(it.name)) {
+                        prefix = "wrap:${prefix}"
+                    }*/
+                    bundle("start-level": "85", "${prefix}:${it.moduleVersion.id.group}/${it.name}/${it.moduleVersion.id.version}")
+                }
+            }
+        }
+    } finally {
+        writer.close()
+    }
+}
+
+def getMvnFileName(groupAsPath, name, version, type, qualifier) {
+    def result = "${groupAsPath}/${name}/${version}/${name}-${version}"
+    if (qualifier == null) {
+        return "${result}.${type}"
+    } else {
+        return "${result}-${qualifier}.${type}"
+    }
+}
+
+
+findBundles(project(':bundles')).each {
+    copyDepsInMavenStructure.dependsOn it.path + ':build'
+}
+
+distTar.dependsOn unzipKaraf
+distZip.dependsOn unzipKaraf
+patchEgitManifest.dependsOn copyDepsInMavenStructure
+distTar.dependsOn patchEgitManifest
+distZip.dependsOn patchEgitManifest
+distTar.dependsOn generateFeatureFile
+distZip.dependsOn generateFeatureFile
+distTar.dependsOn updateFeaturesCfg
+distZip.dependsOn updateFeaturesCfg
+
+def findBundles(projectToCheck) {
+    def result = new ArrayList<>()
+    projectToCheck.childProjects.values().each {
+        if (it.file('build.gradle').exists()) {
+            result.add(it)
+        } else {
+            result.addAll(findBundles(it))
+        }
+    }
+    return result
+}

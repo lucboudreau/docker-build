@@ -1,0 +1,11 @@
+dependencies {
+    compile project(':bundles:api')
+    compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${jacksonVersion}"
+    provided "org.apache.cxf:cxf-rt-frontend-jaxrs:${cxfVersion}"
+}
+
+jar {
+    manifest {
+        instruction 'Import-Package', 'com.fasterxml.jackson.jaxrs.json', '*'
+    }
+}

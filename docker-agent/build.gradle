@@ -1,0 +1,19 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+dependencies {
+  compile project(':bundles:api')
+  compile project(':bundles:util:shell')
+  compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+}
+
+task fatJar(type: Jar) {
+  manifest {
+    attributes 'Main-Class': 'Agent'
+  }
+  baseName = project.name + '-fat'
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  with jar
+}
+
+build.dependsOn fatJar
