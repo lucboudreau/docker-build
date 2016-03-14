@@ -9,7 +9,7 @@ dependencies {
 
 task fatJar(type: Jar) {
   manifest {
-    attributes 'Main-Class': 'Agent'
+    attributes 'Main-Class': 'org.pentaho.build.buddy.agent.Agent'
   }
   baseName = project.name + '-fat'
   from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
