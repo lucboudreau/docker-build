@@ -35,6 +35,12 @@ public class ShellUtil {
                     } catch (IOException e) {
                         outputException.set(e);
                     }
+                } else {
+                    try {
+                        process.getOutputStream().close();
+                    } catch (IOException e) {
+                        outputException.set(e);
+                    }
                 }
             }
         });

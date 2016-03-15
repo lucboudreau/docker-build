@@ -37,7 +37,7 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
                     boolean foundLicense = false;
                     while (!(foundCopyright && foundLicense) && scanner.hasNext()) {
                         String next = scanner.next();
-                        if (!foundCopyright && next.contains("copyright")) {
+                        if (!foundCopyright && next.toLowerCase().contains("copyright")) {
                             foundCopyright = true;
                         }
                         if (!foundLicense) {
