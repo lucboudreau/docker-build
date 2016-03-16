@@ -110,7 +110,7 @@ public class OrchestratorImpl implements Orchestrator {
         SourceRetrievalResult sourceRetrievalResult;
         stdoutLineHandler.handle("Retrieving source with " + sourceRetriever);
         try {
-            sourceRetrievalResult = sourceRetriever.retrieveSource(retrieverConfig);
+            sourceRetrievalResult = sourceRetriever.retrieveSource(retrieverConfig, stdoutLineHandler, stderrLineHandler);
         } catch (IOException e) {
             String message = "Unable to retrieve source code, shutting down";
             stderrLineHandler.handle(message);

@@ -8,11 +8,12 @@ import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.util.template.FTLUtil;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Created by bryan on 3/7/16.
@@ -32,30 +33,42 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
         for (String changedFile : sourceRetrievalResult.getChangedFiles()) {
             final File file = new File(sourceRetrievalResult.getHeadDir(), changedFile);
             if (file.getName().endsWith(".java")) {
-                try (Scanner scanner = new Scanner(file)) {
-                    boolean foundCopyright = false;
-                    boolean foundLicense = false;
-                    while (!(foundCopyright && foundLicense) && scanner.hasNext()) {
-                        String next = scanner.next();
-                        if (!foundCopyright && next.toLowerCase().contains("copyright")) {
-                            foundCopyright = true;
-                        }
-                        if (!foundLicense) {
-                            for (String validLicense : validLicenses) {
-                                if (next.contains(validLicense)) {
-                                    foundLicense = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (!(foundCopyright && foundLicense)) {
-                        violations.add(changedFile);
-                    }
-                }
+                analyzeFile(violations, changedFile, file, stderrLineHandler);
             }
         }
         String violationsText = ftlUtil.render("license.ftl", "violations", violations);
         return new OutputAnalysisImpl(violations.size() == 0 ? OutputSeverity.INFO : OutputSeverity.ERROR, violationsText);
+    }
+
+    void analyzeFile(List<String> violations, String fileName, File file, LineHandler stderrLineHandler) throws IOException {
+        boolean foundCopyright = false;
+        boolean foundLicense = false;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((!foundCopyright || !foundLicense) && ((line = bufferedReader.readLine()) != null)) {
+                if (!foundCopyright && line.toLowerCase().contains("copyright")) {
+                    foundCopyright = true;
+                }
+                if (!foundLicense) {
+                    for (String validLicense : validLicenses) {
+                        if (line.contains(validLicense)) {
+                            foundLicense = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (!foundCopyright) {
+            if (!foundLicense) {
+                stderrLineHandler.handle("Couldn't find acceptable license or copyright on " + fileName);
+            } else {
+                stderrLineHandler.handle("Couldn't find acceptable copyright on " + fileName);
+            }
+            violations.add(fileName);
+        } else if (!foundLicense) {
+            stderrLineHandler.handle("Couldn't find acceptable license on " + fileName);
+            violations.add(fileName);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package org.pentaho.build.buddy.bundles.api.source;
 
 import org.pentaho.build.buddy.bundles.api.HasId;
+import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 
 import java.io.IOException;
 import java.util.Map;
@@ -13,5 +14,5 @@ public interface SourceRetriever extends HasId {
 
     String SOURCE_CONTROL_TYPE = "SourceControlType";
 
-    SourceRetrievalResult retrieveSource(Map config) throws IOException;
+    SourceRetrievalResult retrieveSource(Map config, LineHandler stdoutLineHandler, LineHandler stderrLineHandler) throws IOException;
 }

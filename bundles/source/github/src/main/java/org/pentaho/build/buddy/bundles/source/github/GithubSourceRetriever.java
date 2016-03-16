@@ -1,6 +1,7 @@
 package org.pentaho.build.buddy.bundles.source.github;
 
 import org.pentaho.build.buddy.bundles.api.orchestrator.OrchestrationResult;
+import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetriever;
 import org.pentaho.build.buddy.bundles.api.status.StatusUpdater;
@@ -54,7 +55,7 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
     }
 
     @Override
-    public SourceRetrievalResult retrieveSource(Map config) throws IOException {
+    public SourceRetrievalResult retrieveSource(Map config, LineHandler stdoutLineHandler, LineHandler stderrLineHandler) throws IOException {
         GithubConfigData githubConfigData = new GithubConfigData(config);
 
         PullRequest pullRequest = githubConfigData.getPullRequest();
@@ -92,11 +93,10 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
         try {
             URL url = new URL(repository.getCloneUrl());
             String repositoryUrl = url.getProtocol() + "://" + githubConfigData.getApiToken() + "@" + url.getHost() + url.getPath();
-            LoggingLineHandler stdoutLogger = new LoggingLineHandler(logger, Level.INFO);
-            shellUtil.executeAndCheck(cloneDir, stdoutLogger, stdoutLogger, null, new String[]{"git", "clone", "--depth=" + (reverseCompareInfo.getAheadBy() + 10), "--branch", base.getRef(), repositoryUrl, baseName});
+            shellUtil.executeAndCheck(cloneDir, stderrLineHandler, stdoutLineHandler, null, new String[]{"git", "clone", "--depth=" + (reverseCompareInfo.getAheadBy() + 10), "--branch", base.getRef(), repositoryUrl, baseName});
             FileUtils.copyDirectory(baseFile, headFile);
-            shellUtil.executeAndCheck(headFile, stdoutLogger, stdoutLogger, null, new String[]{"git", "fetch", "--depth=" + (pullRequest.getCommits() + 10), "origin", "pull/" + id + "/head:pullRequest"});
-            shellUtil.executeAndCheck(headFile, stdoutLogger, stdoutLogger, null, new String[]{"git", "merge", "--no-edit", "--no-ff", "pullRequest"});
+            shellUtil.executeAndCheck(headFile, stderrLineHandler, stdoutLineHandler, null, new String[]{"git", "fetch", "--depth=" + (pullRequest.getCommits() + 10), "origin", "pull/" + id + "/head:pullRequest"});
+            shellUtil.executeAndCheck(headFile, stderrLineHandler, stdoutLineHandler, null, new String[]{"git", "merge", "--no-edit", "--no-ff", "pullRequest"});
             FileUtils.deleteDirectory(new File(baseFile, ".git"));
             FileUtils.deleteDirectory(new File(headFile, ".git"));
         } catch (Exception e) {
