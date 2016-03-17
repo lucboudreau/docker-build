@@ -34,8 +34,8 @@ public class BuildTeamImpactAnalyzer implements OutputAnalyzer {
         List<String> sensitiveFiles = new ArrayList<>();
         for (String changedFile : sourceRetrievalResult.getChangedFiles()) {
             String file = new File(sourceRetrievalResult.getHeadDir(), changedFile).getName();
-            for (String sensitiveFile : sensitiveFiles) {
-                if (file.endsWith(sensitiveFile)) {
+            for (Pattern sensitivePattern : sensitivePatterns) {
+                if (sensitivePattern.matcher(file).matches()) {
                     sensitiveFiles.add(file);
                 }
             }
