@@ -33,10 +33,10 @@ public class BuildTeamImpactAnalyzer implements OutputAnalyzer {
     public OutputAnalysis analyzeOutput(SourceRetrievalResult sourceRetrievalResult, LineHandler stdoutHandler, LineHandler stderrLineHandler) throws IOException {
         List<String> sensitiveFiles = new ArrayList<>();
         for (String changedFile : sourceRetrievalResult.getChangedFiles()) {
-            String file = new File(sourceRetrievalResult.getHeadDir(), changedFile).getName();
+            String file = new File(sourceRetrievalResult.getHeadDir(), changedFile).getAbsolutePath();
             for (Pattern sensitivePattern : sensitivePatterns) {
                 if (sensitivePattern.matcher(file).matches()) {
-                    sensitiveFiles.add(file);
+                    sensitiveFiles.add(changedFile);
                 }
             }
         }
