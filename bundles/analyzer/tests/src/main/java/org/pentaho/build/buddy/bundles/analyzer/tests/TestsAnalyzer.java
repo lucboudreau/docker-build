@@ -76,6 +76,11 @@ public class TestsAnalyzer implements OutputAnalyzer {
         return new OutputAnalysisImpl(outputSeverity, ftlUtil.render("tests.ftl", dataMap));
     }
 
+    @Override
+    public String getDescription() {
+        return "Test pass/fail analysis";
+    }
+
     private Map<String, TestSuite> parseSuites(File rootDir, DocumentBuilderFactory documentBuilderFactory) throws IOException {
         Map<String, TestSuite> result = new HashMap<>();
         for (File file : getTestXmls(rootDir)) {
@@ -141,5 +146,10 @@ public class TestsAnalyzer implements OutputAnalyzer {
             }
         });
         return results;
+    }
+
+    @Override
+    public String getId() {
+        return "Test";
     }
 }

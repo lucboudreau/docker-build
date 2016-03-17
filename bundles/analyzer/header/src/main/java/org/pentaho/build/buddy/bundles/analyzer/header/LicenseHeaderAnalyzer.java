@@ -40,6 +40,11 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
         return new OutputAnalysisImpl(violations.size() == 0 ? OutputSeverity.INFO : OutputSeverity.ERROR, violationsText);
     }
 
+    @Override
+    public String getDescription() {
+        return "License header check";
+    }
+
     void analyzeFile(List<String> violations, String fileName, File file, LineHandler stderrLineHandler) throws IOException {
         boolean foundCopyright = false;
         boolean foundLicense = false;
@@ -70,5 +75,10 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
             stderrLineHandler.handle("Couldn't find acceptable license on " + fileName);
             violations.add(fileName);
         }
+    }
+
+    @Override
+    public String getId() {
+        return "License";
     }
 }

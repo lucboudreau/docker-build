@@ -51,10 +51,15 @@ public class JacocoAnalyzer implements OutputAnalyzer {
         String unitMarkdown = ftlUtil.render("jacoco.ftl", unitData);
 
         Map integrationData = new HashMap();
-        integrationData.put("header", "Unit test coverage change");
+        integrationData.put("header", "Integration test coverage change");
         integrationData.put("results", jacocoIntegrationDiff.getResults());
         String integrationMarkdown = ftlUtil.render("jacoco.ftl", integrationData);
         return new OutputAnalysisImpl(OutputSeverity.INFO, (unitMarkdown + "\n\n" + integrationMarkdown));
+    }
+
+    @Override
+    public String getDescription() {
+        return "Test coverage";
     }
 
     private List<File> findFiles(File root, final Set<Pattern> includePatterns) throws IOException {
@@ -74,5 +79,10 @@ public class JacocoAnalyzer implements OutputAnalyzer {
             }
         });
         return result;
+    }
+
+    @Override
+    public String getId() {
+        return "Coverage";
     }
 }

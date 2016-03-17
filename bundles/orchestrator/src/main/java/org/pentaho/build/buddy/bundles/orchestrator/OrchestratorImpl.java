@@ -101,6 +101,37 @@ public class OrchestratorImpl implements Orchestrator {
                 break;
             }
         }
+
+        config = configurationEnricher.enrich(config, StatusUpdater.STATUS_UPDATER, stdoutLineHandler);
+        Map statusUpdaterConfig = (Map) config.get(StatusUpdater.STATUS_UPDATER);
+        StatusUpdater statusUpdater = null;
+        for (StatusUpdater potentialStatusUpdater : statusUpdaters) {
+            if (potentialStatusUpdater.getId().equals(statusUpdaterConfig.get(StatusUpdater.STATUS_UPDATER_TYPE))) {
+                statusUpdater = potentialStatusUpdater;
+                break;
+            }
+        }
+
+        List<OutputAnalyzerWrapper> sortedAnalyzers = new ArrayList<>();
+        synchronized (outputAnalyzers) {
+            sortedAnalyzers.addAll(outputAnalyzers.values());
+        }
+        Collections.sort(sortedAnalyzers);
+        List<OutputAnalyzer> outputAnalyzers = new ArrayList<>(sortedAnalyzers.size());
+        for (OutputAnalyzerWrapper sortedAnalyzer : sortedAnalyzers) {
+            outputAnalyzers.add(sortedAnalyzer.getOutputAnalyzer());
+        }
+
+        if (statusUpdater != null) {
+            try {
+                statusUpdater.onStart(statusUpdaterConfig, outputAnalyzers);
+            } catch (IOException e) {
+                String errorMessage = "Unable to update status" + e.getMessage();
+                stderrLineHandler.handle(errorMessage);
+                stderrLineHandler.handle(e);
+            }
+        }
+
         if (sourceRetriever == null) {
             String errorMessage = "Unable to find source retriever for config " + retrieverConfig;
             stderrLineHandler.handle(errorMessage);
@@ -118,27 +149,7 @@ public class OrchestratorImpl implements Orchestrator {
             return new OrchestrationResultImpl(OrchestrationResult.Status.ERROR, message + ": " + e.getMessage());
         }
 
-        config = configurationEnricher.enrich(config, StatusUpdater.STATUS_UPDATER, stdoutLineHandler);
-        Map statusUpdaterConfig = (Map) config.get(StatusUpdater.STATUS_UPDATER);
-        StatusUpdater statusUpdater = null;
-        for (StatusUpdater potentialStatusUpdater : statusUpdaters) {
-            if (potentialStatusUpdater.getId().equals(statusUpdaterConfig.get(StatusUpdater.STATUS_UPDATER_TYPE))) {
-                statusUpdater = potentialStatusUpdater;
-                break;
-            }
-        }
-
-        if (statusUpdater != null) {
-            try {
-                statusUpdater.onStart(statusUpdaterConfig);
-            } catch (IOException e) {
-                String errorMessage = "Unable to update status" + e.getMessage();
-                stderrLineHandler.handle(errorMessage);
-                stderrLineHandler.handle(e);
-            }
-        }
-
-        OrchestrationResult orchestrationResult = doOrchestrate(config, stdoutLineHandler, stderrLineHandler, sourceRetrievalResult);
+        OrchestrationResult orchestrationResult = doOrchestrate(config, stdoutLineHandler, stderrLineHandler, sourceRetrievalResult, outputAnalyzers, statusUpdater, statusUpdaterConfig);
 
         if (statusUpdater != null) {
             try {
@@ -152,7 +163,7 @@ public class OrchestratorImpl implements Orchestrator {
         return orchestrationResult;
     }
 
-    private OrchestrationResult doOrchestrate(Map config, final LineHandler stdoutLineHandler, final LineHandler stderrLineHandler, final SourceRetrievalResult sourceRetrievalResult) {
+    private OrchestrationResult doOrchestrate(Map config, final LineHandler stdoutLineHandler, final LineHandler stderrLineHandler, final SourceRetrievalResult sourceRetrievalResult, List<OutputAnalyzer> outputAnalyzers, StatusUpdater statusUpdater, Map statusUpdaterConfig) {
         try {
             config = configurationEnricher.enrich(config, CommandBuilder.COMMAND_BUILDER, stdoutLineHandler);
             Map commandBuilderConfig = (Map) config.get(CommandBuilder.COMMAND_BUILDER);
@@ -259,18 +270,19 @@ public class OrchestratorImpl implements Orchestrator {
             }
 
             List<OutputSeverity> outputSeverities = new ArrayList<>();
-            List<OutputAnalyzerWrapper> sortedAnalyzers = new ArrayList<>();
-            synchronized (outputAnalyzers) {
-                sortedAnalyzers.addAll(outputAnalyzers.values());
-            }
-            Collections.sort(sortedAnalyzers);
-            for (OutputAnalyzerWrapper outputAnalyzerWrapper : sortedAnalyzers) {
-                OutputAnalyzer outputAnalyzer = outputAnalyzerWrapper.getOutputAnalyzer();
+            for (OutputAnalyzer outputAnalyzer : outputAnalyzers) {
                 try {
                     OutputAnalysis outputAnalysis = outputAnalyzer.analyzeOutput(sourceRetrievalResult, stdoutLineHandler, stderrLineHandler);
                     outputSeverities.add(outputAnalysis.getOutputSeverity());
                     String trim = outputAnalysis.getReport().trim();
                     outputs.add(trim);
+                    if (statusUpdater != null) {
+                        try {
+                            statusUpdater.onAnalyzerDone(statusUpdaterConfig, outputAnalyzer, outputAnalysis);
+                        } catch (Exception e) {
+                            stderrLineHandler.handle(e);
+                        }
+                    }
                 } catch (Exception e) {
                     String errorMessage = "Error analyzing output with " + outputAnalyzer + ": ";
                     stderrLineHandler.handle(errorMessage);

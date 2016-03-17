@@ -1,5 +1,7 @@
 package org.pentaho.build.buddy.bundles.source.github;
 
+import org.eclipse.egit.github.core.CommitStats;
+import org.eclipse.egit.github.core.CommitStatus;
 import org.eclipse.egit.github.core.PullRequest;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -7,6 +9,7 @@ import org.eclipse.egit.github.core.service.PullRequestService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import static org.pentaho.build.buddy.bundles.util.config.MapUtil.getStringOrThrow;

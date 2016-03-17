@@ -119,4 +119,14 @@ public class CheckstyleAnalyzer implements OutputAnalyzer {
             }
         };
     }
+
+    @Override
+    public String getDescription() {
+        return "See: https://github.com/pentaho/pentaho-coding-standards";
+    }
+
+    @Override
+    public String getId() {
+        return "Checkstyle";
+    }
 }

@@ -39,4 +39,14 @@ public class ChangedAnalyzer implements OutputAnalyzer {
             }
         };
     }
+
+    @Override
+    public String getDescription() {
+        return "Changed files analyzer";
+    }
+
+    @Override
+    public String getId() {
+        return "Changed";
+    }
 }

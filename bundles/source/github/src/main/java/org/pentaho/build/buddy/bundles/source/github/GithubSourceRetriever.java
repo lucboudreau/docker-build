@@ -1,17 +1,18 @@
 package org.pentaho.build.buddy.bundles.source.github;
 
+import org.apache.commons.io.FileUtils;
+import org.eclipse.egit.github.core.*;
+import org.eclipse.egit.github.core.service.CommitService;
+import org.eclipse.egit.github.core.service.IssueService;
 import org.pentaho.build.buddy.bundles.api.orchestrator.OrchestrationResult;
+import org.pentaho.build.buddy.bundles.api.output.OutputAnalysis;
+import org.pentaho.build.buddy.bundles.api.output.OutputAnalyzer;
+import org.pentaho.build.buddy.bundles.api.output.OutputSeverity;
 import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetriever;
 import org.pentaho.build.buddy.bundles.api.status.StatusUpdater;
-import org.pentaho.build.buddy.util.shell.LoggingLineHandler;
 import org.pentaho.build.buddy.util.shell.ShellUtil;
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Level;
-import org.eclipse.egit.github.core.*;
-import org.eclipse.egit.github.core.service.CommitService;
-import org.eclipse.egit.github.core.service.IssueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
     public static final String BRANCH = "Branch";
     public static final String WINGMAN_URL = "WingmanUrl";
     private static final Logger logger = LoggerFactory.getLogger(GithubSourceRetriever.class);
+    public static final String OVERALL = "Overall";
     private final ShellUtil shellUtil;
     private final File cloneDir;
 
@@ -137,16 +139,51 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
     }
 
     @Override
-    public void onStart(Map config) throws IOException {
+    public void onStart(Map config, List<OutputAnalyzer> outputAnalyzers) throws IOException {
         GithubConfigData githubConfigData = new GithubConfigData(config);
-        CommitService commitService = new CommitService(githubConfigData.getGitHubClient());
-        CommitStatus status = new CommitStatus();
+        GithubCommitService commitService = new GithubCommitService(githubConfigData.getGitHubClient(), githubConfigData.getApiToken());
+        GithubCommitStatus status = new GithubCommitStatus();
         status.setState(CommitStatus.STATE_PENDING);
         status.setDescription("Wingman build initiated");
+        status.setContext(OVERALL);
         String wingmanUrl = getStringOrNull(config, WINGMAN_URL);
         if (wingmanUrl != null) {
             status.setTargetUrl(wingmanUrl);
         }
+        String sha = githubConfigData.getPullRequest().getHead().getSha();
+        Repository repository = githubConfigData.getRepository();
+        commitService.createStatus(repository, sha, status);
+        for (OutputAnalyzer outputAnalyzer : outputAnalyzers) {
+            status = new GithubCommitStatus();
+            status.setState(CommitStatus.STATE_PENDING);
+            status.setDescription(outputAnalyzer.getDescription());
+            status.setContext(outputAnalyzer.getId());
+            commitService.createStatus(repository, sha, status);
+        }
+    }
+
+    @Override
+    public void onAnalyzerDone(Map config, OutputAnalyzer outputAnalyzer, OutputAnalysis outputAnalysis) throws IOException {
+        GithubConfigData githubConfigData = new GithubConfigData(config);
+        GithubCommitService commitService = new GithubCommitService(githubConfigData.getGitHubClient(), githubConfigData.getApiToken());
+
+        GithubCommitStatus status = new GithubCommitStatus();
+        OutputSeverity severity = outputAnalysis.getOutputSeverity();
+        switch (severity) {
+            case ERROR:
+                status.setState(CommitStatus.STATE_ERROR);
+                break;
+            case WARNING:
+                status.setState(CommitStatus.STATE_FAILURE);
+                break;
+            case INFO:
+                status.setState(CommitStatus.STATE_SUCCESS);
+                break;
+            default:
+                throw new IOException("Unmatched state: " + severity);
+        }
+        status.setDescription(outputAnalyzer.getDescription());
+        status.setContext(outputAnalyzer.getId());
         commitService.createStatus(githubConfigData.getRepository(), githubConfigData.getPullRequest().getHead().getSha(), status);
     }
 
@@ -154,7 +191,8 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
     public void onStop(Map config, OrchestrationResult orchestrationResult) throws IOException {
         GithubConfigData githubConfigData = new GithubConfigData(config);
         new IssueService(githubConfigData.getGitHubClient()).createComment(githubConfigData.getRepository(), Integer.parseInt(githubConfigData.getPullRequestNumber()), orchestrationResult.getReport());
-        CommitStatus status = new CommitStatus();
+        GithubCommitStatus status = new GithubCommitStatus();
+        status.setContext(OVERALL);
         switch (orchestrationResult.getStatus()) {
             case GOOD:
                 status.setState(CommitStatus.STATE_SUCCESS);
@@ -168,7 +206,7 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
             default:
                 throw new IOException("Unrecognized status: " + orchestrationResult.getStatus());
         }
-        CommitService commitService = new CommitService(githubConfigData.getGitHubClient());
+        GithubCommitService commitService = new GithubCommitService(githubConfigData.getGitHubClient(), githubConfigData.getApiToken());
         commitService.createStatus(githubConfigData.getRepository(), githubConfigData.getPullRequest().getHead().getSha(), status);
     }
 
