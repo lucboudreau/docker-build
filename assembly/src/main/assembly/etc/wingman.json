@@ -1,38 +1,48 @@
 {
+  "_comment": "This config file is made up of categories for the different phases of build each phase as a list of rules.  Rules are made up of an array of [comment, condition, operation]",
   "SourceRetriever": [
-    [ {"SourceRetriever": { "SourceControlType": null } }, {"SourceRetriever": { "SourceControlType": "github"} } ],
-    [ {"SourceRetriever": { "SourceControlType": "github", "ApiToken": null } }, {"SourceRetriever": { "ApiToken": "${GITHUB_API_TOKEN}"} } ],
-    [ {"SourceRetriever": { "SourceControlType": "github", "Organization": null } }, {"SourceRetriever": { "Organization": "pentaho" } } ]
+    ["If there is no SourceRetriever config, create an empty one", {"SourceRetriever": null }, {"SourceRetriever": {} } ],
+    ["If source control type not specified, default to github", {"SourceRetriever": { "SourceControlType": null } }, {"SourceRetriever": { "SourceControlType": "github"} } ],
+    ["If no api token specified, use environment variable", {"SourceRetriever": { "SourceControlType": "github", "ApiToken": null } }, {"SourceRetriever": { "ApiToken": "${GITHUB_API_TOKEN}"} } ],
+    ["If no organization specified, default to pentaho", {"SourceRetriever": { "SourceControlType": "github", "Organization": null } }, {"SourceRetriever": { "Organization": "pentaho" } } ]
   ],
   "StatusUpdater": [
-    [ {"StatusUpdater": null }, {"StatusUpdater": {} } ],
-    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": null } }, {"StatusUpdater": { "StatusUpdaterType": "github"} } ],
-    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "ApiToken": null } }, {"StatusUpdater": { "ApiToken": "#{SourceRetriever.ApiToken}" } } ],
-    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "Organization": null } }, {"StatusUpdater": { "Organization": "#{SourceRetriever.Organization}" } } ],
-    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "Repository": null } }, {"StatusUpdater": { "Repository": "#{SourceRetriever.Repository}" } } ],
-    [ {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "PullRequest": null } }, {"StatusUpdater": { "PullRequest": "#{SourceRetriever.PullRequest}" } } ]
+    ["If there is no StatusUpdater config, create an empty one", {"StatusUpdater": null }, {"StatusUpdater": {} } ],
+    ["If github SourceControlType and null StatusUpdateType, use github", {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": null } }, {"StatusUpdater": { "StatusUpdaterType": "github"} } ],
+
+    ["If github SourceControlType and StatusUpdaterType and null ApiToken, use the one from SourceRetriever", {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "ApiToken": null } }, {"StatusUpdater": { "ApiToken": "#{SourceRetriever.ApiToken}" } } ],
+    ["If github SourceControlType and StatusUpdaterType and null Organization, use the one from SourceRetriever", {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "Organization": null } }, {"StatusUpdater": { "Organization": "#{SourceRetriever.Organization}" } } ],
+    ["If github SourceControlType and StatusUpdaterType and null Repository, use the one from SourceRetriever", {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "Repository": null } }, {"StatusUpdater": { "Repository": "#{SourceRetriever.Repository}" } } ],
+    ["If github SourceControlType and StatusUpdaterType and null PullRequest, use the one from SourceRetriever", {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "PullRequest": null } }, {"StatusUpdater": { "PullRequest": "#{SourceRetriever.PullRequest}" } } ]
   ],
   "CommandBuilder": [
-    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "data-access"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle"}} ],
-    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pdi-platform-utils-plugin"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle"}} ],
-    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-analyzer"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=512m -Djs.karma.failonerror=false -f BUILD_FILE clean-all resolve jacoco test-js checkstyle"}} ],
-    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-commons-database"}}, {"CommandBuilder": { "BuildTool": "ant" }} ],
-    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-kettle"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["core", "engine", "dbdialog", "ui", "plugins"]}} ],
-    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["api", "core", "repository", "scheduler", "extensions", "user-console", "assembly"]}} ],
-    [ {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform-plugin-dashboards"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle"}} ],
-    [ {"CommandBuilder": null}, {"CommandBuilder": { "BuildTool": "mvn"}}],
-    [ {"CommandBuilder": { "BuildTool": "mvn", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "mvn -B -fn -DrunITs=true -f BUILD_FILE clean install && mvn -B -Dpentaho-coding-standards.version=1.0.4 -f BUILD_FILE site"}}],
-    [ {"CommandBuilder": { "BuildTool": "mvn", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "mvn -B build-helper:remove-project-artifact"} } ],
-    [ {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco checkstyle publish-local"}}],
-    [ {"CommandBuilder": { "BuildTool": "ant", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "rm -r ~/.ivy2/local || echo no publish local to remove"} } ]
+    ["data-access repo shouldn't publish local", {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "data-access"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
+    ["pdi-platform-utils-plugin repo shouldn't publish local",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pdi-platform-utils-plugin"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
+    ["pentaho-analyzer should run testjs",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-analyzer"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dtestreports.dir=bin/reports/unit-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco && ant -Dpentaho.coding.standards.version=1.0.4 -Dtestreports.dir=bin/reports/integration-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE jacoco-integration test-js checkstyle"}} ],
+    ["pentaho-commons-database",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-commons-database"}}, {"CommandBuilder": { "BuildTool": "ant" }} ],
+    ["pentaho-kettle multimodule definition",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-kettle"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["core", "engine", "dbdialog", "ui", "plugins"]}} ],
+    ["pentaho-platform multimodule definition",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["api", "core", "repository", "scheduler", "extensions", "user-console", "assembly"]}} ],
+    ["pentaho-platform-plugin-dashboards repo shouldn't publish local",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform-plugin-dashboards"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
+
+    ["Some projects lose output when publishing locally", {"CommandBuilder": null, "Stereotypes": {"build":"ant-no-publish-local"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dtestreports.dir=bin/reports/unit-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco && ant -Dpentaho.coding.standards.version=1.0.4 -Dtestreports.dir=bin/reports/integration-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE jacoco-integration checkstyle"}}],
+
+    ["If there is no CommandBuilder config, create an empty one", {"CommandBuilder": null}, {"CommandBuilder": {}}],
+    ["If no build tool specified, use mvn", {"CommandBuilder": {"BuildTool": null}}, {"CommandBuilder": { "BuildTool": "mvn"}}],
+
+    ["If mvn BuildTool and null BuildCommand, use default", {"CommandBuilder": { "BuildTool": "mvn", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "mvn -B -fn -DrunITs=true -f BUILD_FILE clean install && mvn -B -Dpentaho-coding-standards.version=1.0.4 -f BUILD_FILE site"}}],
+    ["If mvn BuildTool and null CleanupCommand, use default",  {"CommandBuilder": { "BuildTool": "mvn", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "mvn -B build-helper:remove-project-artifact"} } ],
+    ["If ant BuildTool and null BuildCommand, use default",  {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "ant -Dtestreports.dir=bin/reports/unit-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco && ant -Dpentaho.coding.standards.version=1.0.4 -Dtestreports.dir=bin/reports/integration-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE jacoco-integration checkstyle publish-local"}}],
+    ["If ant BuildTool and null CleanupCommand, use default",  {"CommandBuilder": { "BuildTool": "ant", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "rm -r ~/.ivy2/local || echo no publish local to remove"} } ]
   ],
   "BuildRunner": [
-    [ {"BuildRunner": null}, {"BuildRunner": { "RunnerType": "Docker"}}],
-    [ {"SourceRetriever": { "Branch": "master" }, "BuildRunner": { "RunnerType": "Docker", "Container": null }}, {"BuildRunner": { "Container": "build-buddy-8" }}],
-    [ {"BuildRunner": { "RunnerType": "Docker", "Container": null }}, {"BuildRunner": { "Container": "build-buddy-7" }}],
-    [ {"BuildRunner": { "RunnerType": "Docker", "Volumes": null }}, {"BuildRunner": { "Volumes": {
-        "/tmp/m2rep-THREAD_NAME": "/home/buildguy/.m2/repository",
-        "/tmp/ivy2rep-THREAD_NAME": "/home/buildguy/.ivy2"
+    ["Default to Docker", {"BuildRunner": null}, {"BuildRunner": { "RunnerType": "Docker"}}],
+    ["Master branches default to java 8", {"SourceRetriever": { "Branch": "master" }, "BuildRunner": { "RunnerType": "Docker", "Container": null }}, {"BuildRunner": { "Container": "build-buddy-8" }}],
+    ["Others default to java 7", {"BuildRunner": { "RunnerType": "Docker", "Container": null }}, {"BuildRunner": { "Container": "build-buddy-7" }}],
+    ["Mvn builds mount mvn repo", {"CommandBuilder": { "BuildTool": "mvn" }, "BuildRunner": { "RunnerType": "Docker", "Volumes": null }}, {"BuildRunner": { "Volumes": {
+        "/tmp/m2rep-THREAD_NAME": "/home/buildguy/.m2/repository"
+    }}}],
+    ["Ant builds mount ivy repo", {"CommandBuilder": { "BuildTool": "ant" }, "BuildRunner": { "RunnerType": "Docker", "Volumes": null }}, {"BuildRunner": { "Volumes": {
+      "/tmp/ivy2rep-THREAD_NAME": "/home/buildguy/.ivy2"
     }}}]
   ]
 }

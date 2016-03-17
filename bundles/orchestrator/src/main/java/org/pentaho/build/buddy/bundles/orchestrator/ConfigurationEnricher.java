@@ -1,6 +1,7 @@
 package org.pentaho.build.buddy.bundles.orchestrator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,12 +26,13 @@ public class ConfigurationEnricher {
         return new ObjectMapper().readValue(new File(System.getProperty("karaf.etc"), "wingman.json"), Map.class);
     }
 
-    public Map enrich(Map<String, Object> config, String phase) {
+    public Map enrich(Map<String, Object> config, String phase, LineHandler stdoutHandler) {
         Map<String, Object> result = deepCopy(config);
         List<List<Map<String, Object>>> operations = enrichSpec.get(phase);
         for (List<Map<String, Object>> operation : operations) {
-            if (matches(result, operation.get(0))) {
-                apply(result, operation.get(1), result);
+            if (matches(result, operation.get(1))) {
+                stdoutHandler.handle("Config enriched: " + operation.get(0));
+                apply(result, operation.get(2), result);
             }
         }
         return result;
