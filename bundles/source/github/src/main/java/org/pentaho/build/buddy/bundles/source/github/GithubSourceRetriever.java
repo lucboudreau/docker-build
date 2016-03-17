@@ -12,6 +12,7 @@ import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetriever;
 import org.pentaho.build.buddy.bundles.api.status.StatusUpdater;
+import org.pentaho.build.buddy.bundles.util.config.MapUtil;
 import org.pentaho.build.buddy.util.shell.ShellUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
     public static final String WINGMAN_URL = "WingmanUrl";
     private static final Logger logger = LoggerFactory.getLogger(GithubSourceRetriever.class);
     public static final String OVERALL = "Overall";
+    public static final String START_COMMENT = "StartComment";
     private final ShellUtil shellUtil;
     private final File cloneDir;
 
@@ -141,6 +143,10 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
     @Override
     public void onStart(Map config, List<OutputAnalyzer> outputAnalyzers) throws IOException {
         GithubConfigData githubConfigData = new GithubConfigData(config);
+        String startComment = MapUtil.getStringOrNull(config, START_COMMENT);
+        if (startComment != null) {
+            new IssueService(githubConfigData.getGitHubClient()).createComment(githubConfigData.getRepository(), Integer.parseInt(githubConfigData.getPullRequestNumber()), startComment);
+        }
         GithubCommitService commitService = new GithubCommitService(githubConfigData.getGitHubClient(), githubConfigData.getApiToken());
         GithubCommitStatus status = new GithubCommitStatus();
         status.setState(CommitStatus.STATE_PENDING);
