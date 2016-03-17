@@ -23,7 +23,8 @@
     ["pentaho-kettle multimodule definition",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-kettle"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["core", "engine", "dbdialog", "ui", "plugins"]}} ],
     ["pentaho-platform multimodule definition",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform"}}, {"CommandBuilder": { "BuildTool": "ant", "multimodule": ["api", "core", "repository", "scheduler", "extensions", "user-console", "assembly"]}} ],
     ["pentaho-platform-plugin-dashboards repo shouldn't publish local",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform-plugin-dashboards"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
-    ["modeler use ant", {"CommandBuilder": {"BuildTool": null}}, {"CommandBuilder": { "BuildTool": "ant"}}],
+
+    ["modeler use ant", {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "modeler"}}, {"CommandBuilder": { "BuildTool": "ant"}}],
 
     ["Some projects lose output when publishing locally", {"CommandBuilder": null, "Stereotypes": {"build":"ant-no-publish-local"}}, {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": "ant -Dtestreports.dir=bin/reports/unit-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco && ant -Dpentaho.coding.standards.version=1.0.4 -Dtestreports.dir=bin/reports/integration-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE jacoco-integration checkstyle"}}],
 

@@ -92,7 +92,11 @@ public class AntCommandBuilder implements CommandBuilder {
         });
 
         for (String s : buildDirsList) {
-            result.add(command.replace("BUILD_FILE", s + "/build.xml"));
+            String buildXml = "build.xml";
+            if (s != null && s.length() > 0) {
+                buildXml = s + "/" + buildXml;
+            }
+            result.add(command.replace("BUILD_FILE", buildXml));
         }
 
         final String cleanupCommand = MapUtil.getStringOrNull(config, CLEANUP_COMMAND);
