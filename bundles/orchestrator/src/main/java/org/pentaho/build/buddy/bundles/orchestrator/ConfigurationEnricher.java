@@ -26,16 +26,14 @@ public class ConfigurationEnricher {
         return new ObjectMapper().readValue(new File(System.getProperty("karaf.etc"), "wingman.json"), Map.class);
     }
 
-    public Map enrich(Map<String, Object> config, String phase, LineHandler stdoutHandler) {
-        Map<String, Object> result = deepCopy(config);
+    public void enrich(Map<String, Object> config, String phase, LineHandler stdoutHandler) {
         List<List<Map<String, Object>>> operations = enrichSpec.get(phase);
         for (List<Map<String, Object>> operation : operations) {
-            if (matches(result, operation.get(1))) {
+            if (matches(config, operation.get(1))) {
                 stdoutHandler.handle("Config enriched: " + operation.get(0));
-                apply(result, operation.get(2), result);
+                apply(config, operation.get(2), config);
             }
         }
-        return result;
     }
 
     private void apply(Map<String, Object> config, Map<String, Object> operation, Map<String, Object> topLevel) {

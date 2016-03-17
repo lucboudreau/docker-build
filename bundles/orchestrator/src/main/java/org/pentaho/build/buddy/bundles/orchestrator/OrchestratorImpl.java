@@ -92,7 +92,7 @@ public class OrchestratorImpl implements Orchestrator {
 
     @Override
     public OrchestrationResult orchestrate(Map config, final LineHandler stdoutLineHandler, final LineHandler stderrLineHandler) {
-        config = configurationEnricher.enrich(config, SourceRetriever.SOURCE_RETRIEVER, stdoutLineHandler);
+        configurationEnricher.enrich(config, SourceRetriever.SOURCE_RETRIEVER, stdoutLineHandler);
         Map retrieverConfig = (Map) config.get(SourceRetriever.SOURCE_RETRIEVER);
         SourceRetriever sourceRetriever = null;
         for (SourceRetriever potentialSourceRetriever : sourceRetrievers) {
@@ -102,7 +102,7 @@ public class OrchestratorImpl implements Orchestrator {
             }
         }
 
-        config = configurationEnricher.enrich(config, StatusUpdater.STATUS_UPDATER, stdoutLineHandler);
+        configurationEnricher.enrich(config, StatusUpdater.STATUS_UPDATER, stdoutLineHandler);
         Map statusUpdaterConfig = (Map) config.get(StatusUpdater.STATUS_UPDATER);
         StatusUpdater statusUpdater = null;
         for (StatusUpdater potentialStatusUpdater : statusUpdaters) {
@@ -165,7 +165,7 @@ public class OrchestratorImpl implements Orchestrator {
 
     private OrchestrationResult doOrchestrate(Map config, final LineHandler stdoutLineHandler, final LineHandler stderrLineHandler, final SourceRetrievalResult sourceRetrievalResult, List<OutputAnalyzer> outputAnalyzers, StatusUpdater statusUpdater, Map statusUpdaterConfig) {
         try {
-            config = configurationEnricher.enrich(config, CommandBuilder.COMMAND_BUILDER, stdoutLineHandler);
+            configurationEnricher.enrich(config, CommandBuilder.COMMAND_BUILDER, stdoutLineHandler);
             Map commandBuilderConfig = (Map) config.get(CommandBuilder.COMMAND_BUILDER);
             CommandBuilder commandBuilder = null;
             for (CommandBuilder builder : commandBuilders) {
@@ -187,7 +187,7 @@ public class OrchestratorImpl implements Orchestrator {
             }
 
             BuildRunner buildRunner = null;
-            config = configurationEnricher.enrich(config, BuildRunner.BUILD_RUNNER, stdoutLineHandler);
+            configurationEnricher.enrich(config, BuildRunner.BUILD_RUNNER, stdoutLineHandler);
             final Map buildRunnerConfig = (Map) config.get(BuildRunner.BUILD_RUNNER);
             for (BuildRunner runner : buildRunners) {
                 if (runner.canHandle(buildRunnerConfig)) {
