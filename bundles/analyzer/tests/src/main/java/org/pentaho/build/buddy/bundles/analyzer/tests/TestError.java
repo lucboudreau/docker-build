@@ -17,7 +17,7 @@ public class TestError {
     public TestError(String severity, String type, String message) {
         this.severity = severity;
         this.type = type;
-        this.message = message;
+        this.message = message.length() > 500 ? message.substring(0, 500): message;
     }
 
     public String getSeverity() {
