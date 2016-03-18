@@ -29,6 +29,6 @@ The Dockerfiles are in docker-agent
 In there (after building the project) just run:
 
 ```
-docker -t build-buddy-7 -f Dockerfile7 .
-docker -t build-buddy-8 -f Dockerfile8 .
+docker build -t build-buddy-7 -f Dockerfile7 .
+docker build -t build-buddy-8 -f Dockerfile8 .
 ```
