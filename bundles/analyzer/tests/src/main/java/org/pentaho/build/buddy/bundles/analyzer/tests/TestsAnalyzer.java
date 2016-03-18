@@ -81,6 +81,24 @@ public class TestsAnalyzer implements OutputAnalyzer {
         return "Test pass/fail analysis";
     }
 
+    private List<Node> getSuiteNodes(Document document) {
+        Node rootNode = document.getFirstChild();
+        List<Node> suiteNodes = new ArrayList<>();
+        String nodeName = rootNode.getNodeName();
+        if ("testsuites".equals(nodeName)) {
+            NodeList rootNodeChildNodes = rootNode.getChildNodes();
+            for (int i = 0; i < rootNodeChildNodes.getLength(); i++) {
+                Node node = rootNodeChildNodes.item(i);
+                if ("testsuite".equals(node.getNodeName())) {
+                    suiteNodes.add(node);
+                }
+            }
+        } else if ("testsuite".equals(nodeName)) {
+            suiteNodes.add(rootNode);
+        }
+        return suiteNodes;
+    }
+
     private Map<String, TestSuite> parseSuites(File rootDir, DocumentBuilderFactory documentBuilderFactory) throws IOException {
         Map<String, TestSuite> result = new HashMap<>();
         for (File file : getTestXmls(rootDir)) {
@@ -91,28 +109,30 @@ public class TestsAnalyzer implements OutputAnalyzer {
                 throw new IOException(e);
             }
 
-            TestSuite testSuite = new TestSuite();
-            testSuite.addSuiteErrors(findErrors(document.getFirstChild(), "error", "error"));
+            for (Node suiteNode : getSuiteNodes(document)) {
+                TestSuite testSuite = new TestSuite();
+                testSuite.addSuiteErrors(findErrors(suiteNode, "error", "error"));
 
-            NodeList childNodes = document.getFirstChild().getChildNodes();
-            for (int i = 0; i < childNodes.getLength(); i++) {
-                Node node = childNodes.item(i);
-                String nodeName = node.getNodeName();
-                if ("testcase".equals(nodeName)) {
-                    String className = node.getAttributes().getNamedItem("classname").getNodeValue();
-                    String name = node.getAttributes().getNamedItem("name").getNodeValue();
-                    for (TestError testError : findErrors(node, "error", "error")) {
-                        testSuite.addCaseError(className, name, testError);
-                    }
-                    for (TestError testError : findErrors(node, "failure", "failure")) {
-                        testSuite.addCaseError(className, name, testError);
+                NodeList childNodes = suiteNode.getChildNodes();
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    Node node = childNodes.item(i);
+                    String nodeName = node.getNodeName();
+                    if ("testcase".equals(nodeName)) {
+                        String className = node.getAttributes().getNamedItem("classname").getNodeValue();
+                        String name = node.getAttributes().getNamedItem("name").getNodeValue();
+                        for (TestError testError : findErrors(node, "error", "error")) {
+                            testSuite.addCaseError(className, name, testError);
+                        }
+                        for (TestError testError : findErrors(node, "failure", "failure")) {
+                            testSuite.addCaseError(className, name, testError);
+                        }
                     }
                 }
-            }
 
-            if (testSuite.hasErrors()) {
-                String suiteName = document.getFirstChild().getAttributes().getNamedItem("name").getNodeValue();
-                result.put(suiteName, testSuite);
+                if (testSuite.hasErrors()) {
+                    String suiteName = suiteNode.getAttributes().getNamedItem("name").getNodeValue();
+                    result.put(suiteName, testSuite);
+                }
             }
         }
         return result;
