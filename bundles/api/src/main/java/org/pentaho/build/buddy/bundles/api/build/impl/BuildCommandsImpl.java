@@ -14,12 +14,19 @@ public class BuildCommandsImpl implements BuildCommands {
     private final String cleanupCommand;
 
     public BuildCommandsImpl(String before, String command, String cleanupCommand) {
-        this(new ArrayList<>(Arrays.asList(before, command)), cleanupCommand);
+        this(new ArrayList<>(generateCommands(before, command)), cleanupCommand);
     }
 
     public BuildCommandsImpl(List<String> commands, String cleanupCommand) {
         this.commands = commands;
         this.cleanupCommand = cleanupCommand;
+    }
+
+    private static List<String> generateCommands(String before, String command) {
+        if (before == null) {
+            return Arrays.asList(command);
+        }
+        return Arrays.asList(before, command);
     }
 
     @Override
