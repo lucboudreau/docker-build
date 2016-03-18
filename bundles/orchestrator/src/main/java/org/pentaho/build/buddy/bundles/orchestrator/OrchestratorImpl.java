@@ -35,8 +35,9 @@ public class OrchestratorImpl implements Orchestrator {
     private final ExecutorService executorService;
     private final FTLUtil ftlUtil;
     private final ConfigurationEnricher configurationEnricher;
+    private final BuildToolDetector buildToolDetector;
 
-    public OrchestratorImpl(List<SourceRetriever> sourceRetrievers, List<CommandBuilder> commandBuilders, List<BuildRunner> buildRunners, ConfigurationEnricher configurationEnricher, List<StatusUpdater> statusUpdaters) {
+    public OrchestratorImpl(List<SourceRetriever> sourceRetrievers, List<CommandBuilder> commandBuilders, List<BuildRunner> buildRunners, ConfigurationEnricher configurationEnricher, List<StatusUpdater> statusUpdaters, BuildToolDetector buildToolDetector) {
         this(sourceRetrievers, commandBuilders, buildRunners, statusUpdaters, Executors.newCachedThreadPool(new ThreadFactory() {
             private final AtomicLong threadNum = new AtomicLong(1);
             private final Set<Long> availNums = Collections.newSetFromMap(new ConcurrentHashMap<Long, Boolean>());
@@ -75,15 +76,16 @@ public class OrchestratorImpl implements Orchestrator {
                 thread.setDaemon(true);
                 return thread;
             }
-        }), new FTLUtil(OrchestratorImpl.class), configurationEnricher);
+        }), new FTLUtil(OrchestratorImpl.class), configurationEnricher, buildToolDetector);
     }
 
-    public OrchestratorImpl(List<SourceRetriever> sourceRetrievers, List<CommandBuilder> commandBuilders, List<BuildRunner> buildRunners, List<StatusUpdater> statusUpdaters, ExecutorService executorService, FTLUtil ftlUtil, ConfigurationEnricher configurationEnricher) {
+    public OrchestratorImpl(List<SourceRetriever> sourceRetrievers, List<CommandBuilder> commandBuilders, List<BuildRunner> buildRunners, List<StatusUpdater> statusUpdaters, ExecutorService executorService, FTLUtil ftlUtil, ConfigurationEnricher configurationEnricher, BuildToolDetector buildToolDetector) {
         this.sourceRetrievers = sourceRetrievers;
         this.commandBuilders = commandBuilders;
         this.buildRunners = buildRunners;
         this.statusUpdaters = statusUpdaters;
         this.configurationEnricher = configurationEnricher;
+        this.buildToolDetector = buildToolDetector;
         this.outputAnalyzers = new HashMap<>();
         this.executorService = executorService;
         this.ftlUtil = ftlUtil;
@@ -148,6 +150,8 @@ public class OrchestratorImpl implements Orchestrator {
             stderrLineHandler.handle(e);
             return new OrchestrationResultImpl(OrchestrationResult.Status.ERROR, message + ": " + e.getMessage());
         }
+
+        buildToolDetector.tryToDetermineBuildTool(config, sourceRetrievalResult, stdoutLineHandler);
 
         OrchestrationResult orchestrationResult = doOrchestrate(config, stdoutLineHandler, stderrLineHandler, sourceRetrievalResult, outputAnalyzers, statusUpdater, statusUpdaterConfig);
 

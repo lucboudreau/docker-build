@@ -8,9 +8,11 @@
         <argument ref="buildRunners"/>
         <argument ref="configurationEnricher"/>
         <argument ref="statusUpdaters"/>
+        <argument ref="buildToolDetector"/>
     </bean>
 
     <bean id="configurationEnricher" class="org.pentaho.build.buddy.bundles.orchestrator.ConfigurationEnricher" scope="singleton"/>
+    <bean id="buildToolDetector" class="org.pentaho.build.buddy.bundles.orchestrator.BuildToolDetector" scope="singleton"/>
 
     <service ref="orchestratorImpl" interface="org.pentaho.build.buddy.bundles.api.orchestrator.Orchestrator"/>
     <reference-list id="sourceRetrievers" interface="org.pentaho.build.buddy.bundles.api.source.SourceRetriever"/>
