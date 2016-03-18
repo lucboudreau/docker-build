@@ -72,7 +72,7 @@ public class TestsAnalyzer implements OutputAnalyzer {
         dataMap.put("fixed", newlyFixedTests);
         dataMap.put("stillBroken", stillBrokenTests);
 
-        final OutputSeverity outputSeverity = testSuiteDiffMap.size() == 0 ? OutputSeverity.INFO : OutputSeverity.ERROR;
+        final OutputSeverity outputSeverity = newlyBrokenTests.size() == 0 ? OutputSeverity.INFO : OutputSeverity.ERROR;
         return new OutputAnalysisImpl(outputSeverity, ftlUtil.render("tests.ftl", dataMap));
     }
 
