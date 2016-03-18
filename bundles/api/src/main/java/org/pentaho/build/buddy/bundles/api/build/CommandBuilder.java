@@ -15,6 +15,7 @@ public interface CommandBuilder extends HasId {
     String BEFORE_ALL = "BeforeAll";
     String COMMAND = "BuildCommand";
     String CLEANUP_COMMAND = "CleanupCommand";
+    String EXPAND = "Expand";
 
     BuildCommands buildCommands(SourceRetrievalResult sourceRetrievalResult, Map config) throws IOException;
 }

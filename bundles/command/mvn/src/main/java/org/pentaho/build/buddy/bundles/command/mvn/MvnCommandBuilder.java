@@ -2,6 +2,7 @@ package org.pentaho.build.buddy.bundles.command.mvn;
 
 import org.pentaho.build.buddy.bundles.api.build.BuildCommands;
 import org.pentaho.build.buddy.bundles.api.build.CommandBuilder;
+import org.pentaho.build.buddy.bundles.api.build.impl.BuildCommandsImpl;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.bundles.util.config.MapUtil;
 import org.slf4j.Logger;
@@ -29,6 +30,12 @@ public class MvnCommandBuilder implements CommandBuilder {
         String command = MapUtil.getStringOrNull(config, COMMAND);
         if (command == null) {
             command = "mvn -B -f BUILD_FILE clean install site";
+        }
+
+        final String cleanupCommand = MapUtil.getStringOrNull(config, CLEANUP_COMMAND);
+
+        if (!MapUtil.getValue(config, EXPAND, false)) {
+            return new BuildCommandsImpl(beforeAll, command, cleanupCommand);
         }
 
         List<String> changedFiles = new ArrayList<>(sourceRetrievalResult.getChangedFiles());
@@ -100,19 +107,7 @@ public class MvnCommandBuilder implements CommandBuilder {
             result.add(command.replace("BUILD_FILE", relativePathToPom.toString()));
         }
 
-        final String cleanupCommand = MapUtil.getStringOrNull(config, CLEANUP_COMMAND);
-
-        return new BuildCommands() {
-            @Override
-            public List<String> getCommands() {
-                return new ArrayList<>(result);
-            }
-
-            @Override
-            public String getCleanupCommand() {
-                return cleanupCommand;
-            }
-        };
+        return new BuildCommandsImpl(result, cleanupCommand);
     }
 
     @Override

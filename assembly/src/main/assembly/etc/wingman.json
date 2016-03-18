@@ -34,7 +34,8 @@
     ["If mvn BuildTool and null BuildCommand, use default", {"CommandBuilder": { "BuildTool": "mvn", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "mvn -B -fn -DrunITs=true -f BUILD_FILE clean install && mvn -B -Dpentaho-coding-standards.version=1.0.4 -f BUILD_FILE site"}}],
     ["If mvn BuildTool and null CleanupCommand, use default",  {"CommandBuilder": { "BuildTool": "mvn", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "mvn -B build-helper:remove-project-artifact"} } ],
     ["If ant BuildTool and null BuildCommand, use default",  {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "ant -Dtestreports.dir=bin/reports/unit-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco && ant -Dpentaho.coding.standards.version=1.0.4 -Dtestreports.dir=bin/reports/integration-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE jacoco-integration checkstyle publish-local"}}],
-    ["If ant BuildTool and null CleanupCommand, use default",  {"CommandBuilder": { "BuildTool": "ant", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "rm -r ~/.ivy2/local || echo no publish local to remove"} } ]
+    ["If ant BuildTool and null CleanupCommand, use default",  {"CommandBuilder": { "BuildTool": "ant", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "rm -r ~/.ivy2/local || echo no publish local to remove"} } ],
+    ["If Expand not specified default to true", {"CommandBuilder": {"Expand": null}}, {"CommandBuilder": {"Expand": "true"}}]
   ],
   "BuildRunner": [
     ["Default to Docker", {"BuildRunner": null}, {"BuildRunner": { "RunnerType": "Docker"}}],

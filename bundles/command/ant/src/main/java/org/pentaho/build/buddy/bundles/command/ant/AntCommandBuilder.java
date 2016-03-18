@@ -2,6 +2,7 @@ package org.pentaho.build.buddy.bundles.command.ant;
 
 import org.pentaho.build.buddy.bundles.api.build.BuildCommands;
 import org.pentaho.build.buddy.bundles.api.build.CommandBuilder;
+import org.pentaho.build.buddy.bundles.api.build.impl.BuildCommandsImpl;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.bundles.util.config.MapUtil;
 
@@ -29,6 +30,11 @@ public class AntCommandBuilder implements CommandBuilder {
         String command = MapUtil.getStringOrNull(config, COMMAND);
         if (command == null) {
             command = "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco jacoco-integration checkstyle publish-local";
+        }
+        final String cleanupCommand = MapUtil.getStringOrNull(config, CLEANUP_COMMAND);
+
+        if (!MapUtil.getValue(config, EXPAND, false)) {
+            return new BuildCommandsImpl(beforeAll, command, cleanupCommand);
         }
 
         final List<String> baseBuildXmlDirs = new ArrayList<>();
@@ -80,6 +86,7 @@ public class AntCommandBuilder implements CommandBuilder {
                 }
                 return finalMultimoduleOrder.size();
             }
+
             @Override
             public int compare(String o1, String o2) {
                 int o1Index = index(o1);
@@ -99,19 +106,7 @@ public class AntCommandBuilder implements CommandBuilder {
             result.add(command.replace("BUILD_FILE", buildXml));
         }
 
-        final String cleanupCommand = MapUtil.getStringOrNull(config, CLEANUP_COMMAND);
-
-        return new BuildCommands() {
-            @Override
-            public List<String> getCommands() {
-                return result;
-            }
-
-            @Override
-            public String getCleanupCommand() {
-                return cleanupCommand;
-            }
-        };
+        return new BuildCommandsImpl(result, cleanupCommand);
     }
 
     @Override

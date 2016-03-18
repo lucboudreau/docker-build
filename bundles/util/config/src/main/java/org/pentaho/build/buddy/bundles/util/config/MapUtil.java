@@ -22,4 +22,12 @@ public class MapUtil {
         }
         return o.toString();
     }
+
+    public static boolean getValue(Map config, String field, boolean defaultVal) throws IOException {
+        String stringOrNull = getStringOrNull(config, field);
+        if (stringOrNull == null) {
+            return defaultVal;
+        }
+        return Boolean.parseBoolean(stringOrNull);
+    }
 }
