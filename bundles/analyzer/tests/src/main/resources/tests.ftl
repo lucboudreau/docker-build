@@ -1,8 +1,12 @@
-<#macro errorMd className testCase errorType errorMessage>
-${className}<#if testCase??>.${testCase}</#if>: ${errorType}
+<#macro errorMd className errors testCase="">
+${className}<#if testCase?has_content>.${testCase}</#if>:
+-----------------------------------------------
+<#list errors as error>
+${error.type}
 ```
-${errorMessage}
+${error.message}
 ```
+</#list>
 </#macro>
 
 <#macro errorsMd header errors>
@@ -14,12 +18,12 @@ ${header}:
       <#list caseErrors?keys?sort as className>
         <#assign classErrors = caseErrors[className]>
         <#list classErrors?keys?sort as name>
-<@errorMd className=className testCase=name errorType=classErrors[name].type errorMessage=classErrors[name].message/>
+<@errorMd className=className testCase=name errors=classErrors[name]/>
         </#list>
       </#list>
-      <#list errors[suiteName].suiteErrors as error>
-<@errorMd className=suiteName errorType=error.type errorMessage=error.message/>
-      </#list>
+      <#if 0 < errors[suiteName].suiteErrors?size >
+<@errorMd className=suiteName errors=errors[suiteName].suiteErrors/>
+      </#if>
     </#list>
   </#if>
 </#macro>

@@ -8,7 +8,7 @@ import java.util.*;
  */
 public class TestSuite {
     private final List<TestError> suiteErrors = new ArrayList<>();
-    private final Map<String, Map<String, TestError>> caseErrors = new HashMap<>();
+    private final Map<String, Map<String, List<TestError>>> caseErrors = new HashMap<>();
 
     public boolean addSuiteError(TestError suiteError) {
         return suiteErrors.add(suiteError);
@@ -19,14 +19,22 @@ public class TestSuite {
     }
 
     public void addCaseError(String className, String name, TestError caseError) throws IOException {
-        Map<String, TestError> classErrors = caseErrors.get(className);
+        Map<String, List<TestError>> classErrors = caseErrors.get(className);
         if (classErrors == null) {
             classErrors = new HashMap<>();
             caseErrors.put(className, classErrors);
         }
-        TestError put = classErrors.put(name, caseError);
-        if (put != null) {
-            throw new IOException("Already had an error for class " + className + "." + name);
+        List<TestError> caseErrors = classErrors.get(name);
+        if (caseErrors == null) {
+            caseErrors = new ArrayList<>();
+            classErrors.put(name, caseErrors);
+        }
+        caseErrors.add(caseError);
+    }
+
+    public void addCaseErrors(String className, String name, List<TestError> caseErrors) throws IOException {
+        for (TestError caseError : caseErrors) {
+            addCaseError(className, name, caseError);
         }
     }
 
@@ -38,10 +46,14 @@ public class TestSuite {
         return Collections.unmodifiableList(suiteErrors);
     }
 
-    public Map<String, Map<String, TestError>> getCaseErrors() {
-        Map<String, Map<String, TestError>> result = new HashMap<>();
-        for (Map.Entry<String, Map<String, TestError>> stringMapEntry : caseErrors.entrySet()) {
-            result.put(stringMapEntry.getKey(), Collections.unmodifiableMap(stringMapEntry.getValue()));
+    public Map<String, Map<String, List<TestError>>> getCaseErrors() {
+        Map<String, Map<String, List<TestError>>> result = new HashMap<>();
+        for (Map.Entry<String, Map<String, List<TestError>>> stringMapEntry : caseErrors.entrySet()) {
+            Map<String, List<TestError>> classResult = new HashMap<>();
+            for (Map.Entry<String, List<TestError>> stringListEntry : stringMapEntry.getValue().entrySet()) {
+                classResult.put(stringListEntry.getKey(), Collections.unmodifiableList(new ArrayList<>(stringListEntry.getValue())));
+            }
+            result.put(stringMapEntry.getKey(), Collections.unmodifiableMap(classResult));
         }
         return Collections.unmodifiableMap(result);
     }
