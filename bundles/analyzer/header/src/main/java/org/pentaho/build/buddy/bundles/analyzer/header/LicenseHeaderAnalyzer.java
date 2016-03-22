@@ -32,7 +32,7 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
         List<String> violations = new ArrayList<>();
         for (String changedFile : sourceRetrievalResult.getChangedFiles()) {
             final File file = new File(sourceRetrievalResult.getHeadDir(), changedFile);
-            if (file.getName().endsWith(".java")) {
+            if (file.exists() && file.getName().endsWith(".java")) {
                 analyzeFile(violations, changedFile, file, stderrLineHandler);
             }
         }
