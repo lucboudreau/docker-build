@@ -16,6 +16,7 @@
     ["If github SourceControlType and StatusUpdaterType and null PullRequest, use the one from SourceRetriever", {"SourceRetriever": { "SourceControlType": "github" }, "StatusUpdater": { "StatusUpdaterType": "github", "PullRequest": null } }, {"StatusUpdater": { "PullRequest": "#{SourceRetriever.PullRequest}" } } ]
   ],
   "CommandBuilder": [
+    ["pentaho-platform default to ant",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform"}}, {"CommandBuilder": { "BuildTool": "ant"} } ],
     ["data-access repo shouldn't publish local", {"CommandBuilder": { "BuildTool": "ant" }, "SourceRetriever": { "SourceControlType": "github", "Repository": "data-access"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
     ["pdi-platform-utils-plugin repo shouldn't publish local",  {"CommandBuilder": { "BuildTool": "ant" }, "SourceRetriever": { "SourceControlType": "github", "Repository": "pdi-platform-utils-plugin"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
     ["pentaho-analyzer has js",  {"CommandBuilder":  { "BuildTool": "ant" }, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-analyzer"}}, {"Stereotypes": {"build":"ant-js-project"}} ],
