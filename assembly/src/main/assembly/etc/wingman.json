@@ -17,6 +17,8 @@
   ],
   "CommandBuilder": [
     ["pentaho-platform default to ant",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform"}}, {"CommandBuilder": { "BuildTool": "ant"} } ],
+    ["pentaho-platform-ee default to ant",  {"CommandBuilder": null, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-platform-ee"}}, {"CommandBuilder": { "BuildTool": "ant"} } ],
+
     ["data-access repo shouldn't publish local", {"CommandBuilder": { "BuildTool": "ant" }, "SourceRetriever": { "SourceControlType": "github", "Repository": "data-access"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
     ["pdi-platform-utils-plugin repo shouldn't publish local",  {"CommandBuilder": { "BuildTool": "ant" }, "SourceRetriever": { "SourceControlType": "github", "Repository": "pdi-platform-utils-plugin"}}, {"Stereotypes": {"build":"ant-no-publish-local"}} ],
     ["pentaho-analyzer has js",  {"CommandBuilder":  { "BuildTool": "ant" }, "SourceRetriever": { "SourceControlType": "github", "Repository": "pentaho-analyzer"}}, {"Stereotypes": {"build":"ant-js-project"}} ],
@@ -36,6 +38,7 @@
 
     ["If mvn BuildTool and null BuildCommand, use default", {"CommandBuilder": { "BuildTool": "mvn", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "mvn -B -fn -DrunITs=true -f BUILD_FILE clean install && mvn -B -Dpentaho-coding-standards.version=1.0.4 -f BUILD_FILE site"}}],
     ["If mvn BuildTool and null CleanupCommand, use default",  {"CommandBuilder": { "BuildTool": "mvn", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "mvn -B build-helper:remove-project-artifact"} } ],
+    ["If ant BuildTool and null BuildCommand and branch 5.4, use default",  {"SourceRetriever": { "Branch": "5.4" }, "CommandBuilder": { "BuildTool": "ant", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "ant -Dpentaho.coding.standards.version=1.0.4 -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco publish-local"}}],
     ["If ant BuildTool and null BuildCommand, use default",  {"CommandBuilder": { "BuildTool": "ant", "BuildCommand": null}}, {"CommandBuilder": { "BuildCommand": "ant -Dtestreports.dir=bin/reports/unit-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE clean-all resolve jacoco && ant -Dpentaho.coding.standards.version=1.0.4 -Dtestreports.dir=bin/reports/integration-test -Djunit.jvmargs=-XX:PermSize=256m -f BUILD_FILE jacoco-integration checkstyle publish-local"}}],
     ["If ant BuildTool and null CleanupCommand, use default",  {"CommandBuilder": { "BuildTool": "ant", "CleanupCommand": null}}, {"CommandBuilder": { "CleanupCommand": "rm -r ~/.ivy2/local || echo no publish local to remove"} } ],
     ["If Expand not specified default to true", {"CommandBuilder": {"Expand": null}}, {"CommandBuilder": {"Expand": "true"}}]
