@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* 
 RUN apt-get update
 RUN apt-get install -y git curl python python-jinja2 libswt-gtk-3-jni libswt-gtk-3-java nodejs npm libaio1
 
-RUN adduser --disabled-password --gecos '' buildguy
+ARG buildguyUID
+RUN adduser --disabled-password --gecos '' --uid $buildguyUID buildguy
 
 RUN sudo -u buildguy bash -c "cd /home/buildguy && curl http://www.apache.org/dist/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.tar.gz | tar -xz"
 RUN sudo -u buildguy bash -c "cd /home/buildguy && curl https://www.apache.org/dist/ant/binaries/apache-ant-1.9.6-bin.tar.gz | tar -xz"
