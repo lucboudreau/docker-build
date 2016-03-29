@@ -1,4 +1,8 @@
 .gradle/
+bin/
+.project
+.settings/
+.classpath
 out/
 *.iws
 *.iml
