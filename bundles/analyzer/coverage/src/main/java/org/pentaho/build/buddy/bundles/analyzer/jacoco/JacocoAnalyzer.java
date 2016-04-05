@@ -3,7 +3,6 @@ package org.pentaho.build.buddy.bundles.analyzer.jacoco;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalysis;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalyzer;
 import org.pentaho.build.buddy.bundles.api.output.OutputSeverity;
-import org.pentaho.build.buddy.bundles.api.output.impl.OutputAnalysisImpl;
 import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.util.template.FTLUtil;
@@ -54,7 +53,11 @@ public class JacocoAnalyzer implements OutputAnalyzer {
         integrationData.put("header", "Integration test coverage change");
         integrationData.put("results", jacocoIntegrationDiff.getResults());
         String integrationMarkdown = ftlUtil.render("jacoco.ftl", integrationData);
-        return new OutputAnalysisImpl(OutputSeverity.INFO, (unitMarkdown + "\n\n" + integrationMarkdown));
+
+        return new OutputAnalysis.Builder()
+            .severity(OutputSeverity.max(Arrays.asList(jacocoUnitDiff.sev, jacocoIntegrationDiff.sev)))
+            .report(unitMarkdown + "\n\n" + integrationMarkdown)
+            .build();
     }
 
     @Override

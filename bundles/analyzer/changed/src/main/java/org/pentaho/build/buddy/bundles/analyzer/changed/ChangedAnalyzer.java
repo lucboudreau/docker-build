@@ -27,17 +27,10 @@ public class ChangedAnalyzer implements OutputAnalyzer {
         List<String> files = new ArrayList<>(sourceRetrievalResult.getChangedFiles());
         Collections.sort(files);
         final String render = ftlUtil.render("changed.ftl", "fileList", files);
-        return new OutputAnalysis() {
-            @Override
-            public OutputSeverity getOutputSeverity() {
-                return OutputSeverity.INFO;
-            }
-
-            @Override
-            public String getReport() {
-                return render;
-            }
-        };
+        return new OutputAnalysis.Builder()
+            .report(render)
+            .severity(OutputSeverity.INFO)
+            .build();
     }
 
     @Override

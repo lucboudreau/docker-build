@@ -3,7 +3,6 @@ package org.pentaho.build.buddy.bundles.analyzer.tests;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalysis;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalyzer;
 import org.pentaho.build.buddy.bundles.api.output.OutputSeverity;
-import org.pentaho.build.buddy.bundles.api.output.impl.OutputAnalysisImpl;
 import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.util.template.FTLUtil;
@@ -73,7 +72,10 @@ public class TestsAnalyzer implements OutputAnalyzer {
         dataMap.put("stillBroken", stillBrokenTests);
 
         final OutputSeverity outputSeverity = newlyBrokenTests.size() == 0 ? OutputSeverity.INFO : OutputSeverity.ERROR;
-        return new OutputAnalysisImpl(outputSeverity, ftlUtil.render("tests.ftl", dataMap));
+        return new OutputAnalysis.Builder()
+            .severity(outputSeverity)
+            .report(ftlUtil.render("tests.ftl", dataMap))
+            .build();
     }
 
     @Override

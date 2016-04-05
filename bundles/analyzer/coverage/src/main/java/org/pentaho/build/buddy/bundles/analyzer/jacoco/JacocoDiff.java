@@ -1,13 +1,18 @@
 package org.pentaho.build.buddy.bundles.analyzer.jacoco;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.pentaho.build.buddy.bundles.api.output.OutputSeverity;
 
 /**
  * Created by bryan on 3/9/16.
  */
 public class JacocoDiff {
     private final Map<String, Map<String, Map<String, Double>>> results;
+    final OutputSeverity sev;
 
     public JacocoDiff(JacocoOutput before, JacocoOutput after) {
         results = new HashMap<>();
@@ -29,6 +34,25 @@ public class JacocoDiff {
         for (Map.Entry<String, Map<String, Map<String, Double>>> stringMapEntry : afterResults.entrySet()) {
             this.results.put(stringMapEntry.getKey(), diffGroup(new HashMap<String, Map<String, Double>>(), stringMapEntry.getValue()));
         }
+
+        // Determine pass/warning/fail status
+        OutputSeverity worstCase = OutputSeverity.INFO;
+        masterLoop:
+        for (Map.Entry<String, Map<String, Map<String, Double>>> stringMapEntry : results.entrySet()) {
+            Map<String, Map<String, Double>> value = stringMapEntry.getValue();
+            for (Map.Entry<String, Map<String, Double>> mapEntry : value.entrySet()) {
+                Map<String, Double> mapEntryValue = mapEntry.getValue();
+                for (Entry<String, Double> entry : mapEntryValue.entrySet()) {
+                    if (entry.getValue() < 0) {
+                        worstCase =
+                          OutputSeverity.max(
+                            Arrays.asList(worstCase, OutputSeverity.WARNING));
+                        break masterLoop;
+                    }
+                }
+            }
+        }
+        sev = worstCase;
     }
 
     private Map<String, Map<String, Double>> diffGroup(Map<String, Map<String, Double>> before, Map<String, Map<String, Double>> after) {

@@ -3,7 +3,6 @@ package org.pentaho.build.buddy.bundles.analyzer.buildteam;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalysis;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalyzer;
 import org.pentaho.build.buddy.bundles.api.output.OutputSeverity;
-import org.pentaho.build.buddy.bundles.api.output.impl.OutputAnalysisImpl;
 import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.util.template.FTLUtil;
@@ -40,7 +39,11 @@ public class BuildTeamImpactAnalyzer implements OutputAnalyzer {
                 }
             }
         }
-        return new OutputAnalysisImpl(OutputSeverity.INFO, ftlUtil.render("buildteam.ftl", "sensitiveFiles", sensitiveFiles));
+        return new OutputAnalysis.Builder()
+            .severity( OutputSeverity.INFO )
+            .report(ftlUtil.render( "buildteam.ftl", "sensitiveFiles", sensitiveFiles ))
+            .url( null ) // TODO create a wiki page for this.
+            .build();
     }
 
     @Override

@@ -3,7 +3,6 @@ package org.pentaho.build.buddy.bundles.analyzer.header;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalysis;
 import org.pentaho.build.buddy.bundles.api.output.OutputAnalyzer;
 import org.pentaho.build.buddy.bundles.api.output.OutputSeverity;
-import org.pentaho.build.buddy.bundles.api.output.impl.OutputAnalysisImpl;
 import org.pentaho.build.buddy.bundles.api.result.LineHandler;
 import org.pentaho.build.buddy.bundles.api.source.SourceRetrievalResult;
 import org.pentaho.build.buddy.util.template.FTLUtil;
@@ -37,7 +36,11 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
             }
         }
         String violationsText = ftlUtil.render("license.ftl", "violations", violations);
-        return new OutputAnalysisImpl(violations.size() == 0 ? OutputSeverity.INFO : OutputSeverity.ERROR, violationsText);
+
+        return new OutputAnalysis.Builder()
+            .severity(violations.size() == 0 ? OutputSeverity.INFO : OutputSeverity.ERROR)
+            .report(violationsText)
+            .build();
     }
 
     @Override

@@ -107,17 +107,11 @@ public class CheckstyleAnalyzer implements OutputAnalyzer {
             checkstyleFileErrors.add(new CheckstyleFileErrors(file.getAbsolutePath(), checkstyleErrors.get(file)));
         }
         final String string = ftlUtil.render("checkstyle.ftl", "violations", checkstyleFileErrors);
-        return new OutputAnalysis() {
-            @Override
-            public OutputSeverity getOutputSeverity() {
-                return checkstyleFileErrors.size() > 0 ? OutputSeverity.ERROR : OutputSeverity.INFO;
-            }
 
-            @Override
-            public String getReport() {
-                return string;
-            }
-        };
+        return new OutputAnalysis.Builder()
+            .severity(checkstyleFileErrors.size() > 0 ? OutputSeverity.ERROR : OutputSeverity.INFO)
+            .report(string)
+            .build();
     }
 
     @Override
