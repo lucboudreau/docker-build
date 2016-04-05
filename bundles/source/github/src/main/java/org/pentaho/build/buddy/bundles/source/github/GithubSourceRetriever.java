@@ -190,6 +190,7 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
         }
         status.setDescription(outputAnalyzer.getDescription());
         status.setContext(outputAnalyzer.getId());
+        status.setTargetUrl(outputAnalysis.getURL());
         commitService.createStatus(githubConfigData.getRepository(), githubConfigData.getPullRequest().getHead().getSha(), status);
     }
 
