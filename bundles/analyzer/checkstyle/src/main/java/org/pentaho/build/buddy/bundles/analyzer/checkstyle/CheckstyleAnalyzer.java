@@ -111,12 +111,13 @@ public class CheckstyleAnalyzer implements OutputAnalyzer {
         return new OutputAnalysis.Builder()
             .severity(checkstyleFileErrors.size() > 0 ? OutputSeverity.ERROR : OutputSeverity.INFO)
             .report(string)
+            .url("http://wiki.pentaho.com/display/PEOpen/Code+Formatting+and+CheckStyle")
             .build();
     }
 
     @Override
     public String getDescription() {
-        return "See: https://github.com/pentaho/pentaho-coding-standards";
+        return "The code must adhere to the style guidelines.";
     }
 
     @Override

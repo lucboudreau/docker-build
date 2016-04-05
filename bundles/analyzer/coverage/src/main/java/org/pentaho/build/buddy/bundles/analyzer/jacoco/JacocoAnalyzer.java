@@ -62,7 +62,7 @@ public class JacocoAnalyzer implements OutputAnalyzer {
 
     @Override
     public String getDescription() {
-        return "Test coverage";
+        return "The code must be tested appropriately. We recommend a coverage of at least 80% for new classes. Existing classes must not see their coverage drop.";
     }
 
     private List<File> findFiles(File root, final Set<Pattern> includePatterns) throws IOException {
@@ -86,6 +86,6 @@ public class JacocoAnalyzer implements OutputAnalyzer {
 
     @Override
     public String getId() {
-        return "Coverage";
+        return "Code Coverage";
     }
 }

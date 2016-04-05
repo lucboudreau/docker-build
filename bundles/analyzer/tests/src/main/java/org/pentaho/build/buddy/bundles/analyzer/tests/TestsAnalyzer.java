@@ -172,6 +172,6 @@ public class TestsAnalyzer implements OutputAnalyzer {
 
     @Override
     public String getId() {
-        return "Test";
+        return "Tests";
     }
 }

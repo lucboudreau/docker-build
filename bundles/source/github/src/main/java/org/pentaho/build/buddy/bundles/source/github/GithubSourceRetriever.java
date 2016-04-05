@@ -213,6 +213,10 @@ public class GithubSourceRetriever implements SourceRetriever, StatusUpdater {
             default:
                 throw new IOException("Unrecognized status: " + orchestrationResult.getStatus());
         }
+        String wingmanUrl = getStringOrNull(config, WINGMAN_URL);
+        if (wingmanUrl != null) {
+            status.setTargetUrl(wingmanUrl);
+        }
         GithubCommitService commitService = new GithubCommitService(githubConfigData.getGitHubClient(), githubConfigData.getApiToken());
         commitService.createStatus(githubConfigData.getRepository(), githubConfigData.getPullRequest().getHead().getSha(), status);
     }

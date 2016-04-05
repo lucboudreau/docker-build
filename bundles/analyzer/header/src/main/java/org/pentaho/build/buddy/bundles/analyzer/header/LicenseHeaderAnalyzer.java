@@ -45,7 +45,7 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
 
     @Override
     public String getDescription() {
-        return "License header check";
+        return "All files must have a proper license as their header.";
     }
 
     void analyzeFile(List<String> violations, String fileName, File file, LineHandler stderrLineHandler) throws IOException {
@@ -82,6 +82,6 @@ public class LicenseHeaderAnalyzer implements OutputAnalyzer {
 
     @Override
     public String getId() {
-        return "License";
+        return "Headers and Licenses";
     }
 }
